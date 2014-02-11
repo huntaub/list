@@ -1,0 +1,47 @@
+.hero-unit {
+  background-color: #d0b696;
+  border-radius: 0;
+  -webkit-border-radius: 0;
+}
+
+.hero-unit#main {
+  height: 100%;
+  background-image: url("/public/img/background.png");
+  background-repeat: repeat;
+  background-size: 5%;
+}
+
+#main {
+  padding-top: 55px;
+}
+
+form#classSearch input {
+  /*padding: 25px;*/
+}
+form#classSearch .btn#go {
+  padding-top: 14px;
+  padding-bottom: 13px;
+  position: relative;
+  top: -1px;
+}
+form#classSearch .btn#toggle {
+  padding-top: 14px;
+  padding-bottom: 11px;
+}
+
+form {
+  padding: 50px;
+}
+
+.footer {
+  margin-top: 20px;
+  padding-top: 50px;
+  background-color: #0c0919;
+  border-top: solid 5px #1ca4e9;
+  color: #eee;
+  height: 300px;
+}
+
+.actions {
+  margin: 10px;
+}

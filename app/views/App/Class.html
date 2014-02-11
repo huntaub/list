@@ -1,0 +1,51 @@
+{{set . "title" "Class Page"}}
+{{template "header.html" .}}
+
+<div class="container" id="main">
+	<h1>{{ .class.Department }} {{ .class.Number }} - {{ .class.Name }}</h1>
+	<h5>{{ len .class.ValidClassTimes }} Valid Classes - {{ len .class.Sections }} Sections</h5>
+
+	<div class="actions">
+	<a href="#" class="btn btn-success">Purchase Textbooks</a>
+	</div>
+
+	<div class="row">
+		{{ range .class.Sections }}
+		<div class="col-md-6">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					{{ .Number }} - <i>{{.Type}}</i> (<strong>{{ .SISNumber }}</strong> on SIS)
+					{{ if .Topic }}
+					{{ .Topic }}
+					{{ end }}
+				</div>
+				<div class="panel-body">
+					{{ range .Meetings }}
+						<p>
+							{{ if .Days.ContainsString "M" }}M{{ end }}
+							{{ if .Days.ContainsString "T" }}T{{ end }}
+							{{ if .Days.ContainsString "W" }}W{{ end }}
+							{{ if .Days.ContainsString "R" }}R{{ end }}
+							{{ if .Days.ContainsString "F" }}F{{ end }}
+							{{ if .Days.ContainsString "S" }}S{{ end }}
+							- {{ .StartTime.Format "3:04PM" }} to {{ .EndTime.Format "3:04PM" }}
+						</p>
+						<p>{{ .Instructor }} <span class="text-muted">{{ .Location }}</span></p>
+					{{ end }}
+				</div>
+				<div class="panel-footer">
+					{{ .Enrollment }} <span class="text-muted">students</span> / {{ .Capacity }} <span class="text-muted">seats</span>
+				</div>
+			</div>
+		</div>
+		{{ end }}
+	</div>
+	<!-- <h3>Valid Class Times</h3>
+	{{ range .class.ValidClassTimes }}
+		<p>{{ . }}</p>
+	{{ end }} -->
+	<p>Last Updated - {{ .lastUpdated.Format "January 2, 3:04PM" }}</p>
+	</div>
+</div>
+
+{{template "footer.html" .}}
