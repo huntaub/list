@@ -3,6 +3,7 @@
 
 <div class="hero-unit" id="main">
   <div class="container">
+    <h1>Find information on classes.</h1>
     <form role="search" method="post" action="/search" id="classSearch">
       <div class="input-group">
       <div class="input-group-btn">
@@ -14,7 +15,22 @@
       </div><!-- /btn-group -->
       <input type="text" class="form-control input-lg" placeholder="Get info on ECON 3020" name="class">
       <span class="input-group-btn">
-        <input class="btn btn-primary btn-lg" id="go" type="submit">Go!</button>
+        <input class="btn btn-primary btn-lg" id="go" type="submit" value="Search"/>
+      </span>
+      </div>
+    </form>
+    <form role="search" method="post" action="/build" id="classSearch">
+      <div class="input-group">
+      <div class="input-group-btn">
+        <button type="button" class="btn btn-default dropdown-toggle" id="toggle" data-toggle="dropdown">Spring 2014 <span class="caret"></span></button>
+        <ul class="dropdown-menu">
+          <li class="disabled"><a href="#">Spring 2014</a></li>
+          <li class="disabled"><a href="#">Fall 2014 (Currently Unavailable)</a></li>
+        </ul>
+      </div><!-- /btn-group -->
+      <input type="text" class="form-control input-lg" placeholder="ECON 3020, ECON 3010, ECON 3720" name="class">
+      <span class="input-group-btn">
+        <input class="btn btn-primary btn-lg" id="go" type="submit" value="Build My Schedule"/>
       </span>
       </div>
     </form>
@@ -35,5 +51,7 @@
     <p>Help make class registration and scheduling the best at UVa by building applications on top of our Class API (to be released soon).</p>
   </div>
 </div>
+
+<br/><br/><br/>
 
 {{template "footer.html" .}}

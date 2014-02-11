@@ -29,8 +29,8 @@ form#classSearch .btn#toggle {
   padding-bottom: 11px;
 }
 
-form {
-  padding: 50px;
+form#classSearch {
+  padding: 30px 50px;
 }
 
 .footer {
