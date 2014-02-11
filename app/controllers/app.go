@@ -5,8 +5,7 @@ import (
 	"github.com/huntaub/list/app/routes"
 	"github.com/huntaub/list/schedule"
 	"github.com/robfig/revel"
-	// "net/http"
-	"os"
+	"net/http"
 	"regexp"
 	"strings"
 	"time"
@@ -19,18 +18,18 @@ var classRegex *regexp.Regexp
 func init() {
 	f := func(now time.Time) {
 		fmt.Println("Updating Lou's List at", now)
-		fi, err := os.Open("/Users/hunter/Documents/Developer/golang/src/github.com/huntaub/list/app/cache/complete_schedule.html")
-		// resp, err := http.Get("http://rabi.phys.virginia.edu/mySIS/CS2/page.php?Semester=1142&Type=Group&Group=CS&Print=")
+		// fi, err := os.Open("/Users/hunter/Documents/Developer/golang/src/list/app/cache/complete_schedule.html")
+		resp, err := http.Get("http://rabi.phys.virginia.edu/mySIS/CS2/page.php?Semester=1142&Type=Group&Group=CS&Print=")
 		if err != nil {
 			panic(err)
 		}
 		defer func() {
-			if err := fi.Close(); err != nil {
+			if err := resp.Body.Close(); err != nil {
 				panic(err)
 			}
 		}()
 
-		classList, err = schedule.ParseList(fi)
+		classList, err = schedule.ParseList(resp.Body)
 		if err != nil {
 			panic(err)
 		}
