@@ -21,6 +21,7 @@
 						defaultView: 'agendaWeek',
 						minTime: 8,
 						maxTime: 22,
+						header: false,
 						events: function(start, end, callback) {
 							var output = [];
 							var objects;
@@ -31,11 +32,12 @@
 										createEvent(
 											'{{ $cl.Department }} {{ $cl.Number }} ({{ $sec.SISNumber }})',
 											start,
-											'{{ .StartTime.Format "2006-01-02 15:04:05" }}',
-											'{{ .EndTime.Format "2006-01-02 15:04:05" }}',
+											'{{ formatTime .StartTime }}',
+											'{{ formatTime .EndTime }}',
 											'{{ .Days }}');
 									for(x in objects) {
 										output.push(objects[x]);
+										console.log(objects[x]);
 									}
 									// output.push(objects);
 									{{ end}}
@@ -44,11 +46,14 @@
 							// console.log([].concat.apply([], output));
 							// callback([].concat.apply([], output));
 							callback(output);
-						},
+						}
 					})
 				});
 			</script>
 			<div class="panel-footer">
+				<div class="pull-right">
+				Like this schedule? Get it on <a href="http://virginia.edu/sis">SIS</a>.
+				</div>
 				Score: 100
 			</div>
 		</div>
