@@ -23,12 +23,12 @@ func (s *Schedulizer) AddClass(c *Class) {
 func (s *Schedulizer) Calculate() []*Schedule {
 	// Make a New Schedule for Each Ambigious Time Slot
 	// Delete Schedules that Don't Allow any new Class Times
-	fmt.Println("Finding Schedule...")
+	// fmt.Println("Finding Schedule...")
 	allSchedules := []*Schedule{}
 	for _, v := range s.ListedClasses {
 		allSchedules = CreateSchedulesByAddingClass(allSchedules, v)
 		if len(allSchedules) == 0 {
-			fmt.Println("No possible Schedule")
+			// fmt.Println("No possible Schedule")
 			return nil
 		}
 	}
