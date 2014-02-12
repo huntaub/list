@@ -11,6 +11,8 @@ GET     /class/:dept/:num                       App.Class
 
 POST    /search                                 App.Search
 
+POST    /build                                  App.Build
+
 # Ignore favicon requests
 GET     /favicon.ico                            404
 

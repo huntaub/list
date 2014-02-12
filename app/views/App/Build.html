@@ -1,0 +1,58 @@
+{{set . "title" "Class Page"}}
+{{append . "moreScripts" "js/fullcalendar.min.js"}}
+{{append . "moreScripts" "js/main.js"}}
+{{append . "moreStyles" "css/fullcalendar.css"}}
+{{append . "moreStyles" "css/fullcalendar.print.css"}}
+{{template "header.html" .}}
+
+<div class="container" id="main">
+	<h1>We have curated your schedules.</h1>
+	{{ range $i, $v := .sched }}
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				Schedule {{ $i }}
+			</div>
+			<div class="panel-body" id="calendar{{ $i }}">
+			</div>
+			<script>
+				$(document).ready(function() {
+					$("#calendar{{ $i }}").fullCalendar({
+						weekends: false,
+						defaultView: 'agendaWeek',
+						minTime: 8,
+						maxTime: 22,
+						events: function(start, end, callback) {
+							var output = [];
+							var objects;
+							{{ range $classNum, $cl := .Classes }}
+								{{ range $secNum, $sec := .GetSections }}
+									{{ range $sec.Meetings }}
+									objects = 
+										createEvent(
+											'{{ $cl.Department }} {{ $cl.Number }} ({{ $sec.SISNumber }})',
+											start,
+											'{{ .StartTime.Format "2006-01-02 15:04:05" }}',
+											'{{ .EndTime.Format "2006-01-02 15:04:05" }}',
+											'{{ .Days }}');
+									for(x in objects) {
+										output.push(objects[x]);
+									}
+									// output.push(objects);
+									{{ end}}
+								{{ end }}
+							{{ end }}
+							// console.log([].concat.apply([], output));
+							// callback([].concat.apply([], output));
+							callback(output);
+						},
+					})
+				});
+			</script>
+			<div class="panel-footer">
+				Score: 100
+			</div>
+		</div>
+	{{ end }}
+</div>
+
+{{template "footer.html" .}}

@@ -103,6 +103,32 @@ func (c App) Search(class string) revel.Result {
 	}
 }
 
-func (c App) Build(classList string) revel.Result {
+func (c App) Build(userList string) revel.Result {
+	matches := classRegex.FindAllStringSubmatch(userList, -1)
+	if len(matches) < 0 {
+		return c.Redirect(routes.App.NotFound())
+	} else if len(matches) == 1 {
+		return c.Redirect(routes.App.Class(matches[0][1], matches[0][2]))
+	}
+	schedulizer := schedule.CreateSchedulizer()
+
+	for _, class := range matches {
+		if len(class) != 3 {
+			return c.Redirect(routes.App.NotFound())
+		}
+
+		lookup := strings.ToUpper(class[1]) + " " + class[2]
+		cl, ok := classList[lookup]
+		if !ok {
+			return c.Redirect(routes.App.NotFound())
+		}
+
+		schedulizer.AddClass(cl)
+	}
+
+	c.RenderArgs = map[string]interface{}{
+		"sched": schedulizer.Calculate(),
+	}
+
 	return c.Render()
 }

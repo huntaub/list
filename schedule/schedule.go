@@ -58,6 +58,15 @@ type ClassTime struct {
 	SectionNumber []int
 }
 
+func (c ClassTime) GetSections() []*Section {
+	output := []*Section{}
+	c.CreateSectionMap()
+	for _, v := range c.SectionNumber {
+		output = append(output, c.SectionMap[v])
+	}
+	return output
+}
+
 func (c ClassTime) ConflictsWithClassTime(b ClassTime) bool {
 	c.Class.CreateSectionMap()
 	b.Class.CreateSectionMap()
