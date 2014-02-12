@@ -77,12 +77,17 @@ func (c *Class) CreateSectionMap() {
 func (c *Class) ValidClassTimes() []ClassTime {
 	sMap := make(map[int][]*Section)
 	hasLab, hasDiscussion := false, false
+	labs := []*Section{}
+	lectures := []*Section{}
 	for _, x := range c.Sections {
 		switch x.Type {
 		case "Discussion":
 			hasDiscussion = true
 		case "Laboratory":
 			hasLab = true
+			labs = append(labs, x)
+		case "Lecture":
+			lectures = append(lectures, x)
 		}
 		current, ok := sMap[(x.Number / 100)]
 		if !ok {
@@ -91,20 +96,11 @@ func (c *Class) ValidClassTimes() []ClassTime {
 		sMap[(x.Number / 100)] = append(current, x)
 	}
 	output := []ClassTime{}
+
 	if hasLab {
-		// Loop over each group of classes
-		// With Lab classes, the first set of Sections are Lectures, and the Other Set are Labs
-		lect := -1
-		lab := -1
-		for k, _ := range sMap {
-			if lect == -1 {
-				lect = k
-			} else {
-				lab = k
-			}
-		}
-		for _, lectSect := range sMap[lect] {
-			for _, labSect := range sMap[lab] {
+		// Simply Match up Labs and Lectures
+		for _, lectSect := range lectures {
+			for _, labSect := range labs {
 				newCT := ClassTime{
 					Class:         c,
 					SectionNumber: []int{lectSect.Number, labSect.Number},

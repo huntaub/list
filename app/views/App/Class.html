@@ -1,4 +1,4 @@
-{{set . "title" "Class Page"}}
+{{set . "title" .class.Name }}
 {{template "header.html" .}}
 
 <div class="container" id="main">
@@ -30,7 +30,7 @@
 							{{ if .Days.ContainsString "S" }}S{{ end }}
 							- {{ .StartTime.Format "3:04PM" }} to {{ .EndTime.Format "3:04PM" }}
 						</p>
-						<p>{{ .Instructor }} <span class="text-muted">{{ .Location }}</span></p>
+						<p><a href="http://www.ratemyprofessors.com/SelectTeacher.jsp?searchName={{ lastName .Instructor }}&search_submit1=Search&sid=1277">{{ .Instructor }}</a> <span class="text-muted">{{ .Location }}</span></p>
 					{{ end }}
 				</div>
 				<div class="panel-footer">

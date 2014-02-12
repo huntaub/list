@@ -21,8 +21,6 @@ form#classSearch input {
 form#classSearch .btn#go {
   padding-top: 14px;
   padding-bottom: 13px;
-  position: relative;
-  top: -1px;
 }
 form#classSearch .btn#toggle {
   padding-top: 14px;
