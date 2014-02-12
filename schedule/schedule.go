@@ -1,7 +1,8 @@
 package schedule
 
 import (
-	"fmt"
+	// "fmt"
+	"sort"
 	"strconv"
 	"time"
 )
@@ -10,10 +11,68 @@ type Schedulizer struct {
 	ListedClasses map[string][]ClassTime
 }
 
+type ByRankingAlgorithm struct {
+	Possible  []*Schedule
+	Algorithm RankingAlgorithm
+}
+
+func (a ByRankingAlgorithm) Len() int { return len(a.Possible) }
+func (a ByRankingAlgorithm) Swap(i, j int) {
+	a.Possible[i], a.Possible[j] = a.Possible[j], a.Possible[i]
+}
+func (a ByRankingAlgorithm) Less(i, j int) bool {
+	return a.Possible[i].ScoreSchedule(a.Algorithm) > a.Possible[j].ScoreSchedule(a.Algorithm)
+}
+
 func CreateSchedulizer() *Schedulizer {
 	return &Schedulizer{
 		ListedClasses: make(map[string][]ClassTime),
 	}
+}
+
+var bestRanking RankingAlgorithm = func(c *Schedule) float64 {
+	// Get a point for every class that isn't 8-12
+	earlyPoints := 0.0
+	for day := 1; day < 6; day++ {
+		earlyClasses, _ := time.Parse("3:04PM", "8:00AM")
+		for i := 0; i < 16; i++ {
+			_, _, hasClass := c.ClassAtTime(earlyClasses, time.Weekday(day))
+			if !hasClass {
+				earlyPoints += 1
+			} else {
+				break
+			}
+			earlyClasses = earlyClasses.Add(time.Minute * 15)
+		}
+	}
+	// Another point for every class that isn't 11:30-2 (30 minute increments)
+	lunchPoints := 0.0
+	for day := 1; day < 6; day++ {
+		lunchClasses, _ := time.Parse("3:04PM", "11:30AM")
+		for i := 0; i < 10; i++ {
+			_, _, hasStartClass := c.ClassAtTime(lunchClasses.Add(time.Minute), time.Weekday(day))
+			_, _, hasEndClass := c.ClassAtTime(lunchClasses.Add(time.Minute*29), time.Weekday(day))
+			if !hasStartClass && !hasEndClass {
+				lunchPoints += 1
+			}
+			lunchClasses = lunchClasses.Add(time.Minute * 15)
+		}
+	}
+	// Another point for every class that isn't 3-10
+	latePoints := 0.0
+	for day := 1; day < 6; day++ {
+		lateClasses, _ := time.Parse("3:04PM", "10:00PM")
+		for i := 0; i < 28; i++ {
+			_, _, hasClass := c.ClassAtTime(lateClasses, time.Weekday(day))
+			if !hasClass {
+				latePoints += 1
+			} else {
+				break
+			}
+			lateClasses = lateClasses.Add(time.Minute * -15)
+		}
+	}
+	return (latePoints + earlyPoints + lunchPoints)
 }
 
 func (s *Schedulizer) AddClass(c *Class) {
@@ -32,6 +91,7 @@ func (s *Schedulizer) Calculate() []*Schedule {
 			return nil
 		}
 	}
+	sort.Sort(ByRankingAlgorithm{allSchedules, bestRanking})
 	return allSchedules
 }
 
@@ -100,10 +160,11 @@ func (c ClassTime) Equals(x ClassTime) bool {
 	return c.Class.Equals(x.Class)
 }
 
-type RankingAlgorithm func(c []ClassTime) int
+type RankingAlgorithm func(c *Schedule) float64
 
 type Schedule struct {
 	Classes []ClassTime
+	Score   float64
 }
 
 func CreateSchedule() *Schedule {
@@ -112,8 +173,9 @@ func CreateSchedule() *Schedule {
 	}
 }
 
-func (s *Schedule) ScoreSchedule(r RankingAlgorithm) int {
-	return r(s.Classes)
+func (s *Schedule) ScoreSchedule(r RankingAlgorithm) float64 {
+	s.Score = r(s)
+	return s.Score
 }
 
 func (s *Schedule) AddClass(c ClassTime) bool {
@@ -147,66 +209,13 @@ func (s *Schedule) String() string {
 	return output + "]"
 }
 
-func (s *Schedule) Print() {
-	printTime, _ := time.Parse("15:04", "7:50")
-
-	var lastClass []ClassTime = make([]ClassTime, 6)
-	var lineNumber []int = make([]int, 6)
-
-	for h := 0; h < 74; h += 1 {
-		fmt.Print("|")
-		for i := 0; i <= 5; i += 1 {
-
-			length := 15
-			if i == 0 {
-				length = 7
-			}
-
-			if h == 0 || h == 73 {
-				for j := 0; j < length; j += 1 {
-					fmt.Print("-")
-				}
-			} else {
-				if i == 0 {
-					fmt.Print(printTime.Format(" 15:04 "))
-				} else {
-					c, index, ok := s.ClassAtTime(printTime, time.Weekday(i))
-
-					if !c.Equals(lastClass[i]) {
-						lastClass[i] = c
-						lineNumber[i] = -1
-					}
-
-					if !ok {
-						for j := 0; j < length; j += 1 {
-							fmt.Print(" ")
-						}
-					} else {
-						if c.Equals(lastClass[i]) {
-							lineNumber[i] += 1
-						}
-						output := "   " + c.PrintForCalendar(lineNumber[i], index)
-						// Pad the Output
-						for len(output) < length {
-							output += " "
-						}
-						fmt.Print(output)
-					}
-				}
-			}
-			fmt.Print("|")
-		}
-		fmt.Print("\n")
-		printTime = printTime.Add(10 * time.Minute)
-	}
-}
-
 func (s *Schedule) ClassAtTime(t time.Time, day time.Weekday) (ClassTime, int, bool) {
 	for _, v := range s.Classes {
-		theSection := v.Sections[v.SectionNumber[0]]
-		for i, x := range theSection.Meetings {
-			if TimeBeforeOrEqualTo(x.StartTime, t) && TimeAfterOrEqualTo(x.EndTime, t) && x.Days.Contains(day) {
-				return v, i, true
+		for _, m := range v.SectionNumber {
+			for i, x := range v.SectionMap[m].Meetings {
+				if TimeBeforeOrEqualTo(x.StartTime, t) && TimeAfterOrEqualTo(x.EndTime, t) && x.Days.Contains(day) {
+					return v, i, true
+				}
 			}
 		}
 	}
