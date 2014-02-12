@@ -45,7 +45,17 @@ func init() {
 	f(time.Now())
 	classRegex = regexp.MustCompile(`([A-z]{2,4})\s?(\d+)`)
 
-	revel.TemplateFuncs["lastName"] = func(a string) string { return strings.Split(a, " ")[1] }
+	revel.TemplateFuncs["lastName"] = func(a string) string {
+		if a == "Staff" {
+			return a
+		}
+		nameComp := strings.Split(a, " ")
+		if len(nameComp) != 2 {
+			return a
+		} else {
+			return nameComp[1]
+		}
+	}
 }
 
 type App struct {
