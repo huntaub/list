@@ -58,6 +58,10 @@
 				Score: {{ $v.Score }}
 			</div>
 		</div>
+	{{ else }}
+	<div class="alert-danger">
+		Looks like those classes don't have any possible schedule. Sorry about that! Maybe you want to try with different classes.
+	</div>
 	{{ end }}
 </div>
 
