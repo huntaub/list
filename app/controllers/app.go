@@ -19,7 +19,7 @@ func init() {
 	f := func(now time.Time) {
 		fmt.Println("Updating Lou's List at", now)
 		// fi, err := os.Open("/Users/hunter/Documents/Developer/golang/src/list/app/cache/complete_schedule.html")
-		resp, err := http.Get("http://rabi.phys.virginia.edu/mySIS/CS2/page.php?Semester=1142&Type=Group&Group=CS&Print=")
+		resp, err := http.Get("http://rabi.phys.virginia.edu/mySIS/CS2/page.php?Semester=1148&Type=Group&Group=CS&Print=")
 		if err != nil {
 			panic(err)
 		}
@@ -131,8 +131,13 @@ func (c App) Build(userList string) revel.Result {
 		schedulizer.AddClass(cl)
 	}
 
+	sched := schedulizer.Calculate()
+	if len(sched) > 20 {
+		sched = sched[:20]
+	}
+
 	c.RenderArgs = map[string]interface{}{
-		"sched": schedulizer.Calculate(),
+		"sched": sched,
 	}
 
 	return c.Render()
