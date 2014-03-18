@@ -93,6 +93,9 @@ func (c App) Class(dept string, num string) revel.Result {
 }
 
 func (c App) Search(class string) revel.Result {
+	now := time.Now()
+	revel.INFO.Printf("%s - Searching %s", now.String(), class)
+
 	matches := classRegex.FindAllStringSubmatch(class, -1)
 	if len(matches) < 1 || len(matches[0]) < 3 {
 		return c.Redirect(routes.App.NotFound())
@@ -136,6 +139,9 @@ func (c App) SchedulesFromList(list string) ([]*schedule.Schedule, revel.Result)
 }
 
 func (c App) Build(userList string) revel.Result {
+	now := time.Now()
+	revel.INFO.Printf("%s - Building %s", now.String(), userList)
+
 	sched, r := c.SchedulesFromList(userList)
 	if r != nil {
 		return r
@@ -155,6 +161,10 @@ func (c App) Build(userList string) revel.Result {
 
 func (c App) Schedule(perm string, num int) revel.Result {
 	blah, _ := base64.URLEncoding.DecodeString(perm)
+
+	now := time.Now()
+	revel.INFO.Printf("%s - Fetching %s : %d", now.String(), blah, num)
+
 	sched, r := c.SchedulesFromList(string(blah))
 	if r != nil {
 		return r
