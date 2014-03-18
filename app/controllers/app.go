@@ -113,7 +113,7 @@ func (c App) Build(userList string) revel.Result {
 	if len(matches) < 0 {
 		return c.Redirect(routes.App.NotFound())
 	} else if len(matches) == 1 {
-		return c.Redirect(routes.App.Class(matches[0][1], matches[0][2]))
+		return c.Redirect(routes.App.Class(strings.ToUpper(matches[0][1]), matches[0][2]))
 	}
 	schedulizer := schedule.CreateSchedulizer()
 
