@@ -9,6 +9,8 @@ GET     /                                       App.Index
 GET     /class/none                             App.NotFound
 GET     /class/:dept/:num                       App.Class
 
+GET     /schedule/:perm/:num                    App.Schedule
+
 POST    /search                                 App.Search
 
 POST    /build                                  App.Build

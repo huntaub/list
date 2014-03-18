@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/base64"
 	"fmt"
 	"github.com/huntaub/list/app/routes"
 	"github.com/huntaub/list/schedule"
@@ -108,37 +109,61 @@ func (c App) Search(class string) revel.Result {
 	}
 }
 
-func (c App) Build(userList string) revel.Result {
-	matches := classRegex.FindAllStringSubmatch(userList, -1)
+func (c App) SchedulesFromList(list string) ([]*schedule.Schedule, revel.Result) {
+	matches := classRegex.FindAllStringSubmatch(list, -1)
 	if len(matches) < 0 {
-		return c.Redirect(routes.App.NotFound())
+		return nil, c.Redirect(routes.App.NotFound())
 	} else if len(matches) == 1 {
-		return c.Redirect(routes.App.Class(strings.ToUpper(matches[0][1]), matches[0][2]))
+		return nil, c.Redirect(routes.App.Class(strings.ToUpper(matches[0][1]), matches[0][2]))
 	}
 	schedulizer := schedule.CreateSchedulizer()
 
 	for _, class := range matches {
 		if len(class) != 3 {
-			return c.Redirect(routes.App.NotFound())
+			return nil, c.Redirect(routes.App.NotFound())
 		}
 
 		lookup := strings.ToUpper(class[1]) + " " + class[2]
 		cl, ok := classList[lookup]
 		if !ok {
-			return c.Redirect(routes.App.NotFound())
+			return nil, c.Redirect(routes.App.NotFound())
 		}
 
 		schedulizer.AddClass(cl)
 	}
 
-	sched := schedulizer.Calculate()
+	return schedulizer.Calculate(), nil
+}
+
+func (c App) Build(userList string) revel.Result {
+	sched, r := c.SchedulesFromList(userList)
+	if r != nil {
+		return r
+	}
+
 	if len(sched) > 20 {
 		sched = sched[:20]
 	}
 
 	c.RenderArgs = map[string]interface{}{
 		"sched": sched,
+		"perma": base64.URLEncoding.EncodeToString([]byte(userList)),
 	}
 
 	return c.Render()
+}
+
+func (c App) Schedule(perm string, num int) revel.Result {
+	blah, _ := base64.URLEncoding.DecodeString(perm)
+	sched, r := c.SchedulesFromList(string(blah))
+	if r != nil {
+		return r
+	}
+
+	c.RenderArgs = map[string]interface{}{
+		"sched": []*schedule.Schedule{sched[num]},
+		"perma": perm,
+	}
+
+	return c.RenderTemplate("App/Build.html")
 }
