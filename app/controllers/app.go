@@ -129,6 +129,7 @@ func (c App) SchedulesFromList(list string) ([]*schedule.Schedule, revel.Result)
 		lookup := strings.ToUpper(class[1]) + " " + class[2]
 		cl, ok := classList[lookup]
 		if !ok {
+			c.Flash.Error("Couldn't find " + lookup + " in UVa class listings.")
 			return nil, c.Redirect(routes.App.NotFound())
 		}
 

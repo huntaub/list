@@ -3,6 +3,11 @@
 
 <div class="container" id="main">
 	<h1>Uh Oh. We couldn't find your class.</h1>
+	{{ if .flash.error }}
+		<div class="alert alert-danger">
+		{{ .flash.error }}
+		</div>
+	{{ end }}
 	<h5>Instead, here is a picture of a cat for you.</h5>
 	<a href="http://thecatapi.com"><img src="http://thecatapi.com/api/images/get?format=src&type=gif"></a>
 </div>
