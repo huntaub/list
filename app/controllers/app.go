@@ -154,6 +154,7 @@ func (c App) Build(userList string) revel.Result {
 
 	go func() {
 		sched, r = c.SchedulesFromList(userList, quit)
+		revel.INFO.Printf("Successfully finished building.")
 		done <- true
 	}()
 
@@ -161,6 +162,7 @@ func (c App) Build(userList string) revel.Result {
 	case <-timeout:
 		quit <- true
 		time.Sleep(1 * time.Second)
+		revel.INFO.Printf("Timed Out.")
 		timedout = true
 		// c.Flash.Error("Schedules may not be the best as computation timed out.")
 	case <-done:
