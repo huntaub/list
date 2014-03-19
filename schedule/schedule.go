@@ -192,6 +192,7 @@ type RankingAlgorithm func(c *Schedule) float64
 type Schedule struct {
 	Classes []ClassTime
 	Score   float64
+	Scored  bool
 }
 
 func CreateSchedule() *Schedule {
@@ -201,7 +202,11 @@ func CreateSchedule() *Schedule {
 }
 
 func (s *Schedule) ScoreSchedule(r RankingAlgorithm) float64 {
+	if s.Scored {
+		return s.Score
+	}
 	s.Score = r(s)
+	s.Scored = true
 	return s.Score
 }
 
