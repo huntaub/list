@@ -17,7 +17,7 @@
 	{{ range $i, $v := .sched }}
 		<div class="panel panel-default">
 			<div class="panel-heading">
-				Schedule {{ $i }}
+				Schedule {{ addOne $i }}
 			</div>
 			<div class="panel-body" id="calendar{{ $i }}">
 			</div>

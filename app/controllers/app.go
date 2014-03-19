@@ -62,6 +62,10 @@ func init() {
 		str := a.Format(time.RFC1123)
 		return str[:len(str)-3] + "EST"
 	}
+
+	revel.TemplateFuncs["addOne"] = func(a int) int {
+		return a + 1
+	}
 }
 
 type App struct {
