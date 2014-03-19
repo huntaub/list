@@ -7,6 +7,12 @@
 
 <div class="container" id="main">
 	<h1>We have curated your schedules.</h1>
+	<p>{{ .total }} possible schedules found. Here are the top 20.</p>
+	{{ if .to }}
+		<div class="alert alert-danger">
+			The computer took too long to process this schedule. These results are not gaurenteed to be the best, but they are correct schedules.
+		</div>
+	{{ end }}
 	{{ $perma := .perma }}
 	{{ range $i, $v := .sched }}
 		<div class="panel panel-default">
@@ -59,7 +65,7 @@
 			</div>
 		</div>
 	{{ else }}
-	<div class="alert-danger">
+	<div class="alert alert-danger">
 		Looks like those classes don't have any possible schedule. Sorry about that! Maybe you want to try with different classes.
 	</div>
 	{{ end }}

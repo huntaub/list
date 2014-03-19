@@ -14,6 +14,7 @@ GET     /schedule/:perm/:num                    App.Schedule
 POST    /search                                 App.Search
 
 POST    /build                                  App.Build
+GET     /build/timeout                          App.Timeout
 
 # Ignore favicon requests
 GET     /favicon.ico                            404

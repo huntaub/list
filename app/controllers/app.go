@@ -111,7 +111,7 @@ func (c App) Search(class string) revel.Result {
 	}
 }
 
-func (c App) SchedulesFromList(list string) ([]*schedule.Schedule, revel.Result) {
+func (c App) SchedulesFromList(list string, stop chan bool) ([]*schedule.Schedule, revel.Result) {
 	matches := classRegex.FindAllStringSubmatch(list, -1)
 	if len(matches) < 0 {
 		return nil, c.Redirect(routes.App.NotFound())
@@ -134,23 +134,51 @@ func (c App) SchedulesFromList(list string) ([]*schedule.Schedule, revel.Result)
 
 		schedulizer.AddClass(cl)
 	}
+	out := schedulizer.Calculate(stop)
 
-	return schedulizer.Calculate(), nil
+	return out, nil
 }
 
 func (c App) Build(userList string) revel.Result {
 	revel.INFO.Printf("Building %s", userList)
 
-	sched, r := c.SchedulesFromList(userList)
+	var (
+		sched []*schedule.Schedule
+		r     revel.Result
+	)
+
+	timeout := time.After(20 * time.Second)
+	timedout := false
+	done := make(chan bool, 1)
+	quit := make(chan bool, 1)
+
+	go func() {
+		sched, r = c.SchedulesFromList(userList, quit)
+		done <- true
+	}()
+
+	select {
+	case <-timeout:
+		quit <- true
+		time.Sleep(1 * time.Second)
+		timedout = true
+		// c.Flash.Error("Schedules may not be the best as computation timed out.")
+	case <-done:
+		// Just waiting on the world to change.
+	}
+
 	if r != nil {
 		return r
 	}
 
+	tot := len(sched)
 	if len(sched) > 20 {
 		sched = sched[:20]
 	}
 
 	c.RenderArgs = map[string]interface{}{
+		"to":    timedout,
+		"total": tot,
 		"sched": sched,
 		"perma": base64.URLEncoding.EncodeToString([]byte(userList)),
 	}
@@ -163,7 +191,7 @@ func (c App) Schedule(perm string, num int) revel.Result {
 
 	revel.INFO.Printf("Fetching %s : %d", blah, num)
 
-	sched, r := c.SchedulesFromList(string(blah))
+	sched, r := c.SchedulesFromList(string(blah), make(chan bool, 1))
 	if r != nil {
 		return r
 	}
@@ -174,4 +202,8 @@ func (c App) Schedule(perm string, num int) revel.Result {
 	}
 
 	return c.RenderTemplate("App/Build.html")
+}
+
+func (c App) Timeout() revel.Result {
+	return c.Render()
 }

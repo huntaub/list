@@ -1,7 +1,6 @@
 package schedule
 
 import (
-	// "fmt"
 	"sort"
 	"strconv"
 	"time"
@@ -30,83 +29,111 @@ func CreateSchedulizer() *Schedulizer {
 	}
 }
 
-var bestRanking RankingAlgorithm = func(c *Schedule) float64 {
-	// Get a point for every class that isn't 8-12
-	earlyPoints := 0.0
-	for day := 1; day < 6; day++ {
-		earlyClasses, _ := time.Parse("3:04PM", "8:00AM")
-		for i := 0; i < 16; i++ {
-			_, _, hasClass := c.ClassAtTime(earlyClasses, time.Weekday(day))
-			if !hasClass {
-				earlyPoints += 1
-			} else {
-				break
+func bestRanking(stop chan bool) RankingAlgorithm {
+	return func(c *Schedule) float64 {
+		select {
+		case <-stop:
+			stop <- true
+			return 0.0
+		default:
+			// Get a point for every class that isn't 8-12
+			earlyPoints := 0.0
+			for day := 1; day < 6; day++ {
+				earlyClasses, _ := time.Parse("3:04PM", "8:00AM")
+				for i := 0; i < 16; i++ {
+					_, _, hasClass := c.ClassAtTime(earlyClasses, time.Weekday(day))
+					if !hasClass {
+						earlyPoints += 1
+					} else {
+						break
+					}
+					earlyClasses = earlyClasses.Add(time.Minute * 15)
+				}
 			}
-			earlyClasses = earlyClasses.Add(time.Minute * 15)
+			// Another point for every class that isn't 11:30-2 (30 minute increments)
+			lunchPoints := 0.0
+			for day := 1; day < 6; day++ {
+				lunchClasses, _ := time.Parse("3:04PM", "11:30AM")
+				for i := 0; i < 10; i++ {
+					_, _, hasStartClass := c.ClassAtTime(lunchClasses.Add(time.Minute), time.Weekday(day))
+					_, _, hasEndClass := c.ClassAtTime(lunchClasses.Add(time.Minute*29), time.Weekday(day))
+					if !hasStartClass && !hasEndClass {
+						lunchPoints += 1
+					}
+					lunchClasses = lunchClasses.Add(time.Minute * 15)
+				}
+			}
+			// Another point for every class that isn't 3-10
+			latePoints := 0.0
+			for day := 1; day < 6; day++ {
+				lateClasses, _ := time.Parse("3:04PM", "10:00PM")
+				for i := 0; i < 28; i++ {
+					_, _, hasClass := c.ClassAtTime(lateClasses, time.Weekday(day))
+					if !hasClass {
+						latePoints += 1
+					} else {
+						break
+					}
+					lateClasses = lateClasses.Add(time.Minute * -15)
+				}
+			}
+			return (latePoints + earlyPoints + lunchPoints)
 		}
 	}
-	// Another point for every class that isn't 11:30-2 (30 minute increments)
-	lunchPoints := 0.0
-	for day := 1; day < 6; day++ {
-		lunchClasses, _ := time.Parse("3:04PM", "11:30AM")
-		for i := 0; i < 10; i++ {
-			_, _, hasStartClass := c.ClassAtTime(lunchClasses.Add(time.Minute), time.Weekday(day))
-			_, _, hasEndClass := c.ClassAtTime(lunchClasses.Add(time.Minute*29), time.Weekday(day))
-			if !hasStartClass && !hasEndClass {
-				lunchPoints += 1
-			}
-			lunchClasses = lunchClasses.Add(time.Minute * 15)
-		}
-	}
-	// Another point for every class that isn't 3-10
-	latePoints := 0.0
-	for day := 1; day < 6; day++ {
-		lateClasses, _ := time.Parse("3:04PM", "10:00PM")
-		for i := 0; i < 28; i++ {
-			_, _, hasClass := c.ClassAtTime(lateClasses, time.Weekday(day))
-			if !hasClass {
-				latePoints += 1
-			} else {
-				break
-			}
-			lateClasses = lateClasses.Add(time.Minute * -15)
-		}
-	}
-	return (latePoints + earlyPoints + lunchPoints)
 }
 
 func (s *Schedulizer) AddClass(c *Class) {
 	s.ListedClasses[c.Department+" "+strconv.Itoa(c.Number)] = c.ValidClassTimes()
 }
 
-func (s *Schedulizer) Calculate() []*Schedule {
+func (s *Schedulizer) Calculate(stop chan bool) []*Schedule {
 	// Make a New Schedule for Each Ambigious Time Slot
 	// Delete Schedules that Don't Allow any new Class Times
 	// fmt.Println("Finding Schedule...")
 	allSchedules := []*Schedule{}
 	for _, v := range s.ListedClasses {
-		allSchedules = CreateSchedulesByAddingClass(allSchedules, v)
-		if len(allSchedules) == 0 {
-			// fmt.Println("No possible Schedule")
+		select {
+		case <-stop:
 			return nil
+		default:
+			allSchedules = CreateSchedulesByAddingClass(allSchedules, v, stop)
+			if len(allSchedules) == 0 {
+				// fmt.Println("No possible Schedule")
+				return nil
+			}
 		}
 	}
-	sort.Sort(ByRankingAlgorithm{allSchedules, bestRanking})
+
+	sortStop := make(chan bool, 1)
+
+	go func() {
+		<-stop
+		sortStop <- true
+	}()
+
+	// Starting Rankings
+	sort.Sort(ByRankingAlgorithm{allSchedules, bestRanking(sortStop)})
 	return allSchedules
 }
 
-func CreateSchedulesByAddingClass(old []*Schedule, add []ClassTime) []*Schedule {
+func CreateSchedulesByAddingClass(old []*Schedule, add []ClassTime, stop chan bool) []*Schedule {
 	output := []*Schedule{}
 	if len(old) == 0 {
 		old = []*Schedule{new(Schedule)}
 	}
 	for _, s := range old {
 		for _, v := range add {
-			sched := new(Schedule)
-			sched.Classes = make([]ClassTime, len(s.Classes))
-			copy(sched.Classes, s.Classes)
-			if sched.AddClass(v) {
-				output = append(output, sched)
+			// fmt.Println("Checking for stop condition...")
+			select {
+			case <-stop:
+				return nil
+			default:
+				sched := new(Schedule)
+				sched.Classes = make([]ClassTime, len(s.Classes))
+				copy(sched.Classes, s.Classes)
+				if sched.AddClass(v) {
+					output = append(output, sched)
+				}
 			}
 		}
 	}
