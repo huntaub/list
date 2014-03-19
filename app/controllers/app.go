@@ -147,7 +147,7 @@ func (c App) Build(userList string) revel.Result {
 		r     revel.Result
 	)
 
-	timeout := time.After(20 * time.Second)
+	timeout := time.After(3 * time.Second)
 	timedout := false
 	done := make(chan bool, 1)
 	quit := make(chan bool, 1)
