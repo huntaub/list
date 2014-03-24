@@ -2,7 +2,7 @@ function createEvent(title, calStart, classStart, classEnd, classDays) {
 	output = new Array();
 	console.log(classStart)
 	classStart = moment(classStart, "---, DD MMM YYYY HH:mm:ss EST");
-	classEnd = moment(classStart, "---, DD MMM YYYY HH:mm:ss EST");
+	classEnd = moment(classEnd, "---, DD MMM YYYY HH:mm:ss EST");
 	for(i = 0; i < 5; i++) {
 		startTime = new Date(calStart);
 		startTime.setHours(classStart.hour());
