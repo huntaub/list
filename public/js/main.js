@@ -1,14 +1,15 @@
 function createEvent(title, calStart, classStart, classEnd, classDays) {
 	output = new Array();
-	classStart = new Date(classStart);
-	classEnd = new Date(classEnd);
+	console.log(classStart)
+	classStart = moment(classStart, "---, DD MMM YYYY HH:mm:ss EST");
+	classEnd = moment(classStart, "---, DD MMM YYYY HH:mm:ss EST");
 	for(i = 0; i < 5; i++) {
 		startTime = new Date(calStart);
-		startTime.setHours(classStart.getHours());
-		startTime.setMinutes(classStart.getMinutes());
+		startTime.setHours(classStart.hour());
+		startTime.setMinutes(classStart.minute());
 		endTime = new Date(calStart);
-		endTime.setHours(classEnd.getHours());
-		endTime.setMinutes(classEnd.getMinutes());
+		endTime.setHours(classEnd.hour());
+		endTime.setMinutes(classEnd.minute());
 		if(i == 0 && classDays.indexOf("Monday") != -1) {
 			output.push({
 				title: title,
