@@ -99,11 +99,21 @@ func (c *Class) ValidClassTimes() []ClassTime {
 
 	if hasLab {
 		// Simply Match up Labs and Lectures
-		for _, lectSect := range lectures {
+		if len(lectures) > 0 {
+			for _, lectSect := range lectures {
+				for _, labSect := range labs {
+					newCT := ClassTime{
+						Class:         c,
+						SectionNumber: []int{lectSect.Number, labSect.Number},
+					}
+					output = append(output, newCT)
+				}
+			}
+		} else {
 			for _, labSect := range labs {
 				newCT := ClassTime{
 					Class:         c,
-					SectionNumber: []int{lectSect.Number, labSect.Number},
+					SectionNumber: []int{labSect.Number},
 				}
 				output = append(output, newCT)
 			}
