@@ -69,6 +69,10 @@ func init() {
 	revel.TemplateFuncs["addOne"] = func(a int) int {
 		return a + 1
 	}
+
+	revel.TemplateFuncs["lastUpdated"] = func() string {
+		return lastUpdate.Format("January 2, 3:04PM")
+	}
 }
 
 type App struct {
