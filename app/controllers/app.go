@@ -8,13 +8,14 @@ import (
 	"github.com/robfig/revel"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 )
 
 var classList schedule.ClassList
 var lastUpdate time.Time
-var classRegex *regexp.Regexp
+var classRegex, sectionRegex *regexp.Regexp
 
 func init() {
 	f := func(now time.Time) {
@@ -45,7 +46,8 @@ func init() {
 	}()
 	f(time.Now())
 	// classRegex = regexp.MustCompile(`([A-z]{2,4})\s?(\d+)`)
-	classRegex = regexp.MustCompile(`([A-z]{1,4})\s?(\d{4})(?::{((?:,?\s?\d{1,3})+)})?`)
+	classRegex = regexp.MustCompile(`([A-z]{1,4})\s?(\d{4})\s?(?::{((?:,?\s?\d{1,3})+)})?`)
+	sectionRegex = regexp.MustCompile(`\d{1,3}`)
 
 	revel.TemplateFuncs["lastName"] = func(a string) string {
 		if a == "Staff" {
@@ -132,6 +134,42 @@ func (c App) SchedulesFromList(list string, stop chan bool) ([]*schedule.Schedul
 
 		lookup := strings.ToUpper(class[1]) + " " + class[2]
 		cl, ok := classList[lookup]
+
+		if class[3] != "" {
+			sections := sectionRegex.FindAllString(class[3], -1)
+			// revel.INFO.Printf(class[3])
+
+			var newClass *schedule.Class = new(schedule.Class)
+			*newClass = *cl
+
+			newClass.SectionMap = nil
+			newClass.Sections = nil
+			cl.CreateSectionMap()
+			// revel.INFO.Printf(cl.Sections.String())
+
+			for _, v := range sections {
+				i, err := strconv.Atoi(v)
+				revel.INFO.Printf("%v %v", v, i)
+				if err != nil {
+					revel.WARN.Printf(err.Error())
+					c.Flash.Error(lookup + " section " + v + " isn't a real section.")
+					return nil, c.Redirect(routes.App.NotFound())
+				}
+
+				s, ok := cl.SectionMap[i]
+				if !ok {
+					c.Flash.Error("Couldn't find " + lookup + " section " + v + " in UVa class listings.")
+					return nil, c.Redirect(routes.App.NotFound())
+				}
+
+				newClass.Sections = append(newClass.Sections, s)
+			}
+			newClass.CreateSectionMap()
+
+			revel.INFO.Printf(fmt.Sprintf("%v", newClass.ValidClassTimes()))
+
+			cl = newClass
+		}
 		if !ok {
 			c.Flash.Error("Couldn't find " + lookup + " in UVa class listings.")
 			return nil, c.Redirect(routes.App.NotFound())
