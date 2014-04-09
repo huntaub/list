@@ -44,7 +44,8 @@ func init() {
 		}
 	}()
 	f(time.Now())
-	classRegex = regexp.MustCompile(`([A-z]{2,4})\s?(\d+)`)
+	// classRegex = regexp.MustCompile(`([A-z]{2,4})\s?(\d+)`)
+	classRegex = regexp.MustCompile(`([A-z]{1,4})\s?(\d{4})(?::{((?:,?\s?\d{1,3})+)})?`)
 
 	revel.TemplateFuncs["lastName"] = func(a string) string {
 		if a == "Staff" {
@@ -125,7 +126,7 @@ func (c App) SchedulesFromList(list string, stop chan bool) ([]*schedule.Schedul
 	schedulizer := schedule.CreateSchedulizer()
 
 	for _, class := range matches {
-		if len(class) != 3 {
+		if len(class) < 3 {
 			return nil, c.Redirect(routes.App.NotFound())
 		}
 
@@ -183,10 +184,11 @@ func (c App) Build(userList string) revel.Result {
 	}
 
 	c.RenderArgs = map[string]interface{}{
-		"to":    timedout,
-		"total": tot,
-		"sched": sched,
-		"perma": base64.URLEncoding.EncodeToString([]byte(userList)),
+		"to":      timedout,
+		"total":   tot,
+		"sched":   sched,
+		"perma":   base64.URLEncoding.EncodeToString([]byte(userList)),
+		"request": userList,
 	}
 
 	return c.Render()

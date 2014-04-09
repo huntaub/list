@@ -6,7 +6,23 @@
 {{template "header.html" .}}
 
 <div class="container" id="main">
-	<h1>We have curated your schedules.</h1>
+	<h3>Search Again</h3>
+    <form role="search" method="post" action="/build" id="classSearch" style="padding: 0;">
+      <div class="input-group">
+      <div class="input-group-btn">
+        <button type="button" class="btn btn-default dropdown-toggle" id="toggle" data-toggle="dropdown">Fall 2014 <span class="caret"></span></button>
+        <ul class="dropdown-menu">
+          <li class="disabled"><a href="#">Spring 2015</a></li>
+        </ul>
+      </div>
+      <input type="text" class="form-control input-lg" value="{{ .request }}" name="userList">
+      <span class="input-group-btn">
+        <input class="btn btn-primary btn-lg" id="go" type="submit" value="Build My Schedule"/>
+      </span>
+      </div>
+    </form>
+	<hr/>
+	<h3>We have curated your schedules.</h3>
 	<p>{{ .total }} possible schedules found. Here are the top 20.</p>
 	{{ if .to }}
 		<div class="alert alert-danger">
@@ -14,62 +30,73 @@
 		</div>
 	{{ end }}
 	{{ $perma := .perma }}
+	<div class="row">
 	{{ range $i, $v := .sched }}
-		<div class="panel panel-default">
-			<div class="panel-heading">
-				Schedule {{ addOne $i }}
-			</div>
-			<div class="panel-body" id="calendar{{ $i }}">
-			</div>
-			<script>
-				$(document).ready(function() {
-					$("#calendar{{ $i }}").fullCalendar({
-						weekends: false,
-						defaultView: 'agendaWeek',
-						minTime: 8,
-						maxTime: 22,
-						header: false,
-						columnFormat: "dddd",
-						events: function(start, end, callback) {
-							var output = [];
-							var objects;
-							{{ range $classNum, $cl := .Classes }}
-								{{ range $secNum, $sec := .GetSections }}
-									{{ range $sec.Meetings }}
-									objects = 
-										createEvent(
-											'{{ $cl.Department }} {{ $cl.Number }} ({{ $sec.SISNumber }})',
-											start,
-											'{{ formatTime .StartTime }}',
-											'{{ formatTime .EndTime }}',
-											'{{ .Days }}');
-									for(x in objects) {
-										output.push(objects[x]);
-										console.log(objects[x]);
-									}
-									// output.push(objects);
-									{{ end}}
-								{{ end }}
-							{{ end }}
-							// console.log([].concat.apply([], output));
-							// callback([].concat.apply([], output));
-							callback(output);
-						}
-					})
-				});
-			</script>
-			<div class="panel-footer">
-				<div class="pull-right">
-				<a href="/schedule/{{ $perma }}/{{ $i }}">Permalink</a>
+		<div class="col-lg-6">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					Schedule {{ addOne $i }}
 				</div>
-				Score: {{ $v.Score }}
+				<div class="panel-body" id="calendar{{ $i }}">
+				</div>
+				<script>
+					$(document).ready(function() {
+						$("#calendar{{ $i }}").fullCalendar({
+							weekends: false,
+							defaultView: 'agendaWeek',
+							minTime: 8,
+							maxTime: 22,
+							header: false,
+							columnFormat: "dddd",
+							eventRender: function (event, element) {
+								element.find('.fc-event-title').html(event.title);
+							},
+							events: function(start, end, callback) {
+								var output = [];
+								var objects;
+								{{ range $classNum, $cl := .Classes }}
+									{{ range $secNum, $sec := .GetSections }}
+										{{ $cap := $sec.Capacity }}
+										{{ $stud := $sec.Enrollment }}
+										{{ range $sec.Meetings }}
+										objects = 
+											createEvent(
+												'{{ $cl.Department }} {{ $cl.Number }} ({{ $sec.SISNumber }}) <div class="text-small">{{ .Location }}</div>',
+												start,
+												'{{ formatTime .StartTime }}',
+												'{{ formatTime .EndTime }}',
+												'{{ .Days }}', {{ $cap }}, {{ $stud }});
+										for(x in objects) {
+											output.push(objects[x]);
+											console.log(objects[x]);
+										}
+										// output.push(objects);
+										{{ end}}
+									{{ end }}
+								{{ end }}
+								// console.log([].concat.apply([], output));
+								// callback([].concat.apply([], output));
+								callback(output);
+							}
+						})
+					});
+				</script>
+				<div class="panel-footer">
+					<div class="pull-right">
+					<a href="/schedule/{{ $perma }}/{{ $i }}">Permalink</a>
+					</div>
+					Score: {{ $v.Score }}
+				</div>
 			</div>
 		</div>
 	{{ else }}
-	<div class="alert alert-danger">
-		Looks like those classes don't have any possible schedule. Sorry about that! Maybe you want to try with different classes.
+	<div class="col-xs-12">
+		<div class="alert alert-danger">
+			Looks like those classes don't have any possible schedule. Sorry about that! Maybe you want to try with different classes.
+		</div>
 	</div>
 	{{ end }}
+	</div>
 </div>
 
 {{template "footer.html" .}}

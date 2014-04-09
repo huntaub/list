@@ -43,3 +43,8 @@ form#classSearch {
 .actions {
   margin: 10px 0px;
 }
+
+.text-small {
+  font-size: 90%;
+  color: #535353;
+}
