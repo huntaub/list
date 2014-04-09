@@ -38,7 +38,7 @@ func init() {
 		lastUpdate = now
 	}
 	go func() {
-		c := time.Tick(time.Hour * 1)
+		c := time.Tick(time.Minute * 15)
 		for {
 			now := <-c
 			f(now)
