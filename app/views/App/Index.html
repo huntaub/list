@@ -1,6 +1,25 @@
 {{set . "title" "Leath's List"}}
 {{template "header.html" .}}
 
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="/public/js/triangles.js"></script>
+<script>
+  $(document).ready(function() {
+    var t = new Trianglify({
+      x_gradient: colorbrewer.PuOr[9],
+    });
+    var pattern = t.generate(document.body.clientWidth, 500);
+    $(".hero-unit")[0].setAttribute('style', 'background-image: '+pattern.dataUrl + '; background-repeat: none; background-size: 100%;');
+  });
+</script>
+<style>
+@media(max-width: 960px;) {
+  .hero-unit {
+    background-width: 960px;
+  }
+}
+</style>
+
 <div class="hero-unit" id="main">
   <div class="container">
     <!-- <h1>Find information on classes.</h1> -->
@@ -37,9 +56,6 @@
 
 <div class="container">
   <br/>
-  <div class="alert alert-warning">
-    <strong>NEW</strong> You may select specific sections of classes like this `STS 2500:{1}`, and classes on the schedule now have borders that reflect how full they are.
-  </div>
   <div class="row">
     <div class="col-md-4">
       <h3>Why?</h3>
@@ -54,6 +70,27 @@
       <p>Help make class registration and scheduling the best at UVa by building applications on top of our Class API (to be released soon).</p>
     </div>
   </div>
+
+  <hr/>
+
+  <h2>Browse</h2>
+
+<!--   <div class="input-group">
+    <input type="text" class="form-control input-lg" placeholder="ECON" name="userList">
+    <span class="input-group-btn">
+      <input class="btn btn-primary btn-lg" id="go" type="submit" value="Go"/>
+    </span>
+  </div>
+  <br/> -->
+
+  <div class="row">
+  {{ range .result }}
+  <div class="col-xs-3 col-sm-1">
+    <a href="/department/{{ . }}" style="margin-bottom: 15px;">{{ . }}</a>
+  </div>
+  {{ end }}
+  </div>
+
   <br/>
   <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
 <!-- Leath's List -->

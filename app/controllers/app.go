@@ -6,8 +6,10 @@ import (
 	"github.com/huntaub/list/app/routes"
 	"github.com/huntaub/list/schedule"
 	"github.com/robfig/revel"
+	"labix.org/v2/mgo"
 	"net/http"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -17,7 +19,14 @@ var classList schedule.ClassList
 var lastUpdate time.Time
 var classRegex, sectionRegex *regexp.Regexp
 
+var collection *mgo.Collection
+var users *mgo.Collection
+
 func init() {
+	session, _ := mgo.Dial("mongodb://leath:hunter0813@oceanic.mongohq.com:10000/list")
+	collection = session.DB("list").C("classes")
+	users = session.DB("list").C("users")
+
 	f := func(now time.Time) {
 		fmt.Println("Updating Lou's List at", now)
 		// fi, err := os.Open("/Users/hunter/Documents/Developer/golang/src/list/app/cache/complete_schedule.html")
@@ -35,6 +44,7 @@ func init() {
 		if err != nil {
 			panic(err)
 		}
+		classList.SaveToDB(collection)
 		lastUpdate = now
 	}
 	go func() {
@@ -73,6 +83,32 @@ func init() {
 	revel.TemplateFuncs["lastUpdated"] = func() string {
 		return lastUpdate.Format("January 2, 3:04PM")
 	}
+
+	revel.TemplateFuncs["classPanel"] = func(c *schedule.Class) string {
+		totalCapacity := 0.0
+		totalEnrollment := 0.0
+		for _, v := range c.Sections {
+			totalCapacity += float64(v.Capacity)
+			totalEnrollment += float64(v.Enrollment)
+		}
+		if totalEnrollment/totalCapacity >= 0.75 {
+			return "panel-danger"
+		} else if totalEnrollment/totalCapacity >= 0.5 {
+			return "panel-warning"
+		}
+		return "panel-default"
+	}
+
+	revel.TemplateFuncs["sectionBorder"] = func(v *schedule.Section) string {
+		totalEnrollment := float64(v.Enrollment)
+		totalCapacity := float64(v.Capacity)
+		if totalEnrollment/totalCapacity >= 0.75 {
+			return "border-danger"
+		} else if totalEnrollment/totalCapacity >= 0.5 {
+			return "border-warning"
+		}
+		return "border-default"
+	}
 }
 
 type App struct {
@@ -80,27 +116,47 @@ type App struct {
 }
 
 func (c App) Index() revel.Result {
-	return c.Render()
+	var result []string
+	err := collection.Find(nil).Distinct("department", &result)
+	if err != nil {
+		panic(err)
+	}
+
+	sort.Sort(sort.StringSlice(result))
+
+	return c.Render(result)
 }
 
 func (c App) NotFound() revel.Result {
 	return c.Render()
 }
 
-func (c App) Class(dept string, num string) revel.Result {
-	cl, ok := classList[dept+" "+num]
+//"sections":{"$elemMatch":{"sisnumber":10120}}
 
-	if !ok {
+func (c App) Class(dept string, num int) revel.Result {
+	var class *schedule.Class
+	err := collection.Find(map[string]interface{}{"department": dept, "number": num}).One(&class)
+	if err != nil {
+		fmt.Println(err)
 		return c.Redirect(routes.App.NotFound())
 	}
 
 	c.RenderArgs = map[string]interface{}{
-		"class":       cl,
-		"ok":          ok,
+		"class":       class,
 		"lastUpdated": lastUpdate,
 	}
 
 	return c.Render()
+}
+
+func (c App) Department(dept string) revel.Result {
+	var classes []schedule.Class
+	err := collection.Find(map[string]string{"department": dept}).Sort("number").All(&classes)
+	if err != nil {
+		panic(err)
+	}
+
+	return c.Render(classes, dept)
 }
 
 func (c App) Search(class string) revel.Result {
@@ -118,7 +174,8 @@ func (c App) Search(class string) revel.Result {
 		return c.Redirect(routes.App.NotFound())
 	} else {
 		comp := strings.Split(lookup, " ")
-		return c.Redirect(routes.App.Class(comp[0], comp[1]))
+		number, _ := strconv.Atoi(comp[1])
+		return c.Redirect(routes.App.Class(comp[0], number))
 	}
 }
 
@@ -127,7 +184,8 @@ func (c App) SchedulesFromList(list string, stop chan bool) ([]*schedule.Schedul
 	if len(matches) < 0 {
 		return nil, c.Redirect(routes.App.NotFound())
 	} else if len(matches) == 1 {
-		return nil, c.Redirect(routes.App.Class(strings.ToUpper(matches[0][1]), matches[0][2]))
+		number, _ := strconv.Atoi(matches[0][2])
+		return nil, c.Redirect(routes.App.Class(strings.ToUpper(matches[0][1]), number))
 	}
 	schedulizer := schedule.CreateSchedulizer()
 

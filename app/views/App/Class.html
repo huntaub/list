@@ -7,6 +7,7 @@
 
 	<div class="actions">
 	<a href="http://www.hoosbooks.com/#!{{ .class.Department }}-{{ .class.Number }}-55" class="btn btn-success">Purchase Textbooks</a>
+	<a href="https://evals.itc.virginia.edu/course-selectionguide/pages/SGMain.jsp?cmp={{ .class.Department }},{{ .class.Number }}," class="btn btn-primary">Course Evals</a>
 	</div>
 
 	<div class="row">
@@ -40,10 +41,6 @@
 		</div>
 		{{ end }}
 	</div>
-	<!-- <h3>Valid Class Times</h3>
-	{{ range .class.ValidClassTimes }}
-		<p>{{ . }}</p>
-	{{ end }} -->
 	<p>Last Updated - {{ .lastUpdated.Format "January 2, 3:04PM" }}</p>
 	</div>
 </div>

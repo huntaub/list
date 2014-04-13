@@ -48,3 +48,15 @@ form#classSearch {
   font-size: 90%;
   color: #535353;
 }
+
+.border-danger {
+  border-left: solid 7px #e62426 !important;
+}
+
+.border-warning {
+  border-left: solid 5px #e0d916 !important;
+}
+
+.border-default {
+  border-left: solid 3px #23a020 !important;
+}
