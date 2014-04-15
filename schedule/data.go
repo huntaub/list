@@ -65,6 +65,16 @@ type MeetDays []time.Weekday
 
 type SectionList []*Section
 
+func (s SectionTime) GetStart() time.Time {
+	// fmt.Println(s.StartTime)
+	return s.StartTime.UTC()
+}
+
+func (s SectionTime) GetEnd() time.Time {
+	// fmt.Println(s.EndTime)
+	return s.EndTime.UTC()
+}
+
 func (c *Class) CreateSectionMap() {
 	if c.SectionMap == nil {
 		c.SectionMap = make(map[int]*Section)

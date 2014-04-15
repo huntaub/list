@@ -1,0 +1,50 @@
+<div class="panel panel-default">
+		<div class="panel-heading">
+			<h4><a href="/class/{{ .Department }}/{{ .Number }}">{{ .Department }} {{ .Number }}</a> - <strong>{{ .Name }}</strong> <a href="#" class="pull-right slider"><i class="fa {{ if or (eq .Name "Independent Study") (eq .Name "Capstone Research") }}fa-plus-square{{ else }}fa-minus-square{{ end }}"></i></a></h4>
+		</div>
+		<div class="list-group" {{ if or (eq .Name "Independent Study") (eq .Name "Capstone Research") }}style="display:none;"{{ end }}>
+		{{ range .Sections }}
+			<div class="list-group-item {{ sectionBorder . }}">
+				<div class="row">
+					<div class="col-xs-1">
+						<strong>{{ .SISNumber }}</strong>
+					</div>
+					<div class="col-xs-5">
+						<p> 
+							{{ .Number }} - <i>{{.Type}}</i> <br/>
+							{{ .Topic }}
+						</p>
+					</div>
+					<div class="col-xs-6">
+						{{ range .Meetings }}
+							<p style="margin: 0;">
+								{{ if .TBA }}
+								<span class="text-muted">TBA</span>
+								{{ else }}
+								{{ if .Days.ContainsString "M" }}M{{ else }}_{{ end }}
+								{{ if .Days.ContainsString "T" }}T{{ else }}_{{ end }}
+								{{ if .Days.ContainsString "W" }}W{{ else }}_{{ end }}
+								{{ if .Days.ContainsString "R" }}R{{ else }}_{{ end }}
+								{{ if .Days.ContainsString "F" }}F{{ else }}_{{ end }}
+								{{ if .Days.ContainsString "S" }}S{{ else }}{{ end }}
+								- {{ .GetStart.Format "3:04PM" }} to {{ .GetEnd.Format "3:04PM" }}
+								{{ end }}
+								<a href="http://www.ratemyprofessors.com/SelectTeacher.jsp?searchName={{ lastName .Instructor }}&search_submit1=Search&sid=1277">{{ .Instructor }}</a> <span class="text-muted">{{ .Location }}</span>
+							</p>
+						{{ end }}
+					</div>
+				</div>
+				{{ .Enrollment }} <span class="text-muted">students</span> / {{ .Capacity }} <span class="text-muted">seats</span>
+			</div>
+		{{ end }}
+		</div>
+
+		<div class="panel-footer">
+			<a href="http://www.hoosbooks.com/#!{{ .Department }}-{{ .Number }}-55">Purchase Textbooks</a>
+			&middot;
+			<a href="https://evals.itc.virginia.edu/course-selectionguide/pages/SGMain.jsp?cmp={{ .Department }},{{ .Number }},">Course Evals</a>
+			&middot;
+			<a href="http://thecourseforum.com/search/search?utf8=%E2%9C%93&query={{ .Department }}+{{ .Number }}&button=">TCF</a>
+			<!-- <a href="https://evals.itc.virginia.edu/course-selectionguide/pages/SGMain.jsp?cmp={{ .Department }},{{ .Number }}," class="btn btn-success btn-xs pull-right">+ Add to My Class List</a> -->
+		</div>
+	</div>
