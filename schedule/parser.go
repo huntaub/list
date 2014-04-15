@@ -175,7 +175,7 @@ func ParseTime(timeString []string, locationString []string, instructorString []
 	for i, meet_time := range timeString {
 		newSection := SectionTime{}
 		if meet_time == "TBA" {
-			newSection.tba = true
+			newSection.TBA = true
 			output = append(output, newSection)
 			continue
 		}

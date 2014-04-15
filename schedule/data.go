@@ -56,7 +56,7 @@ type SectionTime struct {
 	StartTime  time.Time
 	EndTime    time.Time
 	Days       MeetDays
-	tba        bool
+	TBA        bool
 }
 
 type Meetings []SectionTime
