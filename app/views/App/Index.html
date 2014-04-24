@@ -54,6 +54,39 @@
   </div>
 </div>
 
+{{ if .loggedIn }}
+<div class="container">
+  <div class="row">
+    <div class="col-xs-6">
+      <h3>My Class List</h3>
+      <ul class="list-group">
+        {{ range .classes }}
+          <li class="list-group-item">
+            <div class="pull-right" style="top: -2px; position: relative;">
+              <!-- <button class="btn btn-xs btn-warning">Alert</button> -->
+              <a href="/class/{{ .Department }}/{{ .Number }}/remove" class="btn btn-xs btn-danger">X</a>
+            </div>
+            <a href="/class/{{ .Department }}/{{ .Number }}">{{ .Department }} {{ .Number }}</a> -
+            <span class="text-muted">{{ .Name }}</span> <br/>
+          </li>
+        {{ else }}
+          <li class="list-group-item">
+            Go and add some classes by browsing below or searching for a class above.
+          </li>
+        {{ end }}
+      </ul>
+      <form role="search" method="post" action="/build">
+        <input type="hidden" value="{{ range .classes }}{{ .Department }} {{ .Number }},{{ end }}" name="userList">
+        <input class="btn btn-primary" id="go" type="submit" value="Schedules from Class List"/>
+      </form>
+    </div>
+    <div class="col-xs-6">
+      <h3>My Saved Schedules</h3>
+    </div>
+  </div>
+<hr/>
+</div>
+{{ else }}
 <div class="container">
   <br/>
   <div class="row">
@@ -70,18 +103,66 @@
       <p>Help make class registration and scheduling the best at UVa by building applications on top of our Class API (to be released soon).</p>
     </div>
   </div>
+</div>
 
-  <hr/>
+<div style="background-color: #dddddd; padding: 20px 0; margin: 10px 0;">
+  <div class="container">
+    {{ if .flash.error }}
+    <div class="alert alert-warning">
+      {{ .flash.error }}
+    </div>
+    {{ end }}
+    <div class="row">
+      <div class="col-md-4">
+      <h3 style="margin-top: 0;">Register</h3>
+        <form class="form" method="post" action="/register">
+          <div class="form-group">
+            <input type="text" placeholder="Name" class="form-control" name="name">
+          </div>
+          <div class="form-group">
+            <input type="text" placeholder="Email" class="form-control" name="email">
+          </div>
+          <div class="form-group">
+            <input type="password" placeholder="Password" class="form-control" name="password">
+          </div>
+          <div class="form-group">
+            <input type="password" placeholder="Confirm Password" class="form-control" name="cpassword">
+          </div>
+          <button type="submit" class="btn btn-success">Register</button>
+        </form>
+      </div>
 
-  <h2>Browse</h2>
+      <div class="col-md-4">
+        <h4>Why?</h4>
+        <p>By logging in or registering, you get access to more features than anonymous users, and you will see new features before they go live on the homepage.</p>
+        <ul class="list-unstyled text-success" style="margin-left: 10px;">
+          <li><i class="fa fa-check"></i> Save Schedules</li>
+          <li><i class="fa fa-check"></i> Class Opening Alerts</li>
+          <li><i class="fa fa-check"></i> API Usage</li>
+          <li><i class="fa fa-check"></i> No Ads</li>
+        </ul>
+      </div>
 
-<!--   <div class="input-group">
-    <input type="text" class="form-control input-lg" placeholder="ECON" name="userList">
-    <span class="input-group-btn">
-      <input class="btn btn-primary btn-lg" id="go" type="submit" value="Go"/>
-    </span>
+      <div class="col-md-4">
+      <h3 style="margin-top: 0;">Login</h3>
+        <form class="form" method="post" action="/login">
+          <div class="form-group">
+            <input type="text" placeholder="Email" class="form-control" name="email">
+          </div>
+          <div class="form-group">
+            <input type="password" placeholder="Password" class="form-control" name="password">
+          </div>
+          <button type="submit" class="btn btn-success">Log In</button>
+        </form>
+      </div>
+    </div>
   </div>
-  <br/> -->
+</div>
+{{ end }}
+
+<div class="container">
+
+  <h2 style="margin-top: 0;">Browse by Department</h2>
 
   <div class="row">
   {{ range .result }}
@@ -91,6 +172,7 @@
   {{ end }}
   </div>
 
+{{ if not .loggedIn }}
   <br/>
   <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
 <!-- Leath's List -->
@@ -101,6 +183,7 @@
 <script>
 (adsbygoogle = window.adsbygoogle || []).push({});
 </script>
+{{ end }}
 </div>
 
 <br/><br/><br/>

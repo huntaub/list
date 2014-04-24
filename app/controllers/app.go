@@ -20,12 +20,12 @@ var lastUpdate time.Time
 var classRegex, sectionRegex *regexp.Regexp
 
 var collection *mgo.Collection
-var users *mgo.Collection
+var lists *mgo.Collection
 
 func init() {
 	session, _ := mgo.Dial("mongodb://leath:hunter0813@oceanic.mongohq.com:10000/list")
 	collection = session.DB("list").C("classes")
-	users = session.DB("list").C("users")
+	lists = session.DB("list").C("lists")
 
 	f := func(now time.Time) {
 		fmt.Println("Updating Lou's List at", now)
@@ -99,20 +99,93 @@ func init() {
 		return "panel-default"
 	}
 
+	revel.TemplateFuncs["classCreator"] = func(class interface{}, loggedIn interface{}) map[string]interface{} {
+		return map[string]interface{}{
+			"class":    class,
+			"loggedIn": loggedIn,
+		}
+	}
+
 	revel.TemplateFuncs["sectionBorder"] = func(v *schedule.Section) string {
 		totalEnrollment := float64(v.Enrollment)
 		totalCapacity := float64(v.Capacity)
-		if totalEnrollment/totalCapacity >= 0.75 {
+		if totalEnrollment/totalCapacity >= 1 {
 			return "border-danger"
 		} else if totalEnrollment/totalCapacity >= 0.5 {
 			return "border-warning"
 		}
 		return "border-default"
 	}
+
+	revel.InterceptMethod(App.Init, revel.BEFORE)
 }
 
 type App struct {
 	*revel.Controller
+	session string
+}
+
+func (c App) Init() revel.Result {
+	_, loggedIn := c.Session["user"]
+	c.RenderArgs["loggedIn"] = loggedIn
+	return nil
+}
+
+func (c App) ClassAdd(dept string, num int) revel.Result {
+	user, ok := c.Session["user"]
+	if !ok {
+		c.Response.Status = 403
+		return c.Render()
+	}
+
+	var u User
+	err := users.Find(map[string]string{"email": user}).One(&u)
+	if err != nil {
+		panic(err)
+	}
+
+	u.ClassBucket = append(u.ClassBucket, fmt.Sprintf("%v %v", dept, num))
+
+	err = users.Update(map[string]string{"email": user}, u)
+	if err != nil {
+		panic(err)
+	}
+
+	return c.Redirect(routes.App.Index())
+}
+
+func (c App) ClassRemove(dept string, num int) revel.Result {
+	user, ok := c.Session["user"]
+	if !ok {
+		c.Response.Status = 403
+		return c.Render()
+	}
+
+	var u User
+	err := users.Find(map[string]string{"email": user}).One(&u)
+	if err != nil {
+		panic(err)
+	}
+
+	newBucket := make([]string, len(u.ClassBucket)-1)
+	found := false
+	i := 0
+	for _, v := range u.ClassBucket {
+		if v == fmt.Sprintf("%v %v", dept, num) && !found {
+			found = true
+			continue
+		}
+		newBucket[i] = v
+		i++
+	}
+	u.ClassBucket = newBucket
+
+	err = users.Update(map[string]string{"email": user}, u)
+	if err != nil {
+		panic(err)
+	}
+
+	return c.Redirect(routes.App.Index())
 }
 
 func (c App) Index() revel.Result {
@@ -122,14 +195,30 @@ func (c App) Index() revel.Result {
 		panic(err)
 	}
 
+	user, ok := c.Session["user"]
+	var classes []*schedule.Class
+	if ok {
+		var u User
+		err := users.Find(map[string]string{"email": user}).One(&u)
+		if err != nil {
+			panic(err)
+		}
+		classes = make([]*schedule.Class, len(u.ClassBucket))
+		for i, v := range u.ClassBucket {
+			classes[i] = classList[v]
+		}
+	}
+
 	sort.Sort(sort.StringSlice(result))
 
-	return c.Render(result)
+	return c.Render(result, classes)
 }
 
 func (c App) NotFound() revel.Result {
 	return c.Render()
 }
+
+// "sections": {"$elemMatch": {"instructor": "Aaron Bloomfield"}}
 
 //"sections":{"$elemMatch":{"sisnumber":10120}}
 
@@ -141,10 +230,7 @@ func (c App) Class(dept string, num int) revel.Result {
 		return c.Redirect(routes.App.NotFound())
 	}
 
-	c.RenderArgs = map[string]interface{}{
-		"class":       class,
-		"lastUpdated": lastUpdate,
-	}
+	c.RenderArgs["class"] = class
 
 	return c.Render()
 }

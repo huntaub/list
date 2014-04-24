@@ -1,9 +1,10 @@
 <div class="panel panel-default">
+		{{ $loggedIn := .loggedIn }}
 		<div class="panel-heading">
-			<h4><a href="/class/{{ .Department }}/{{ .Number }}">{{ .Department }} {{ .Number }}</a> - <strong>{{ .Name }}</strong> <a href="#" class="pull-right slider"><i class="fa {{ if or (eq .Name "Independent Study") (eq .Name "Capstone Research") }}fa-plus-square{{ else }}fa-minus-square{{ end }}"></i></a></h4>
+			<h4><a href="/class/{{ .class.Department }}/{{ .class.Number }}">{{ .class.Department }} {{ .class.Number }}</a> - <strong>{{ .class.Name }}</strong> <a href="#" class="pull-right slider"><i class="fa {{ if or (eq .class.Name "Independent Study") (eq .class.Name "Capstone Research") }}fa-plus-square{{ else }}fa-minus-square{{ end }}"></i></a></h4>
 		</div>
-		<div class="list-group" {{ if or (eq .Name "Independent Study") (eq .Name "Capstone Research") }}style="display:none;"{{ end }}>
-		{{ range .Sections }}
+		<div class="list-group" {{ if or (eq .class.Name "Independent Study") (eq .class.Name "Capstone Research") }}style="display:none;"{{ end }}>
+		{{ range .class.Sections }}
 			<div class="list-group-item {{ sectionBorder . }}">
 				<div class="row">
 					<div class="col-xs-1">
@@ -40,11 +41,13 @@
 		</div>
 
 		<div class="panel-footer">
-			<a href="http://www.hoosbooks.com/#!{{ .Department }}-{{ .Number }}-55">Purchase Textbooks</a>
+			<a href="http://www.hoosbooks.com/#!{{ .class.Department }}-{{ .class.Number }}-55">Purchase Textbooks</a>
 			&middot;
-			<a href="https://evals.itc.virginia.edu/course-selectionguide/pages/SGMain.jsp?cmp={{ .Department }},{{ .Number }},">Course Evals</a>
+			<a href="https://evals.itc.virginia.edu/course-selectionguide/pages/SGMain.jsp?cmp={{ .class.Department }},{{ .class.Number }},">Course Evals</a>
 			&middot;
-			<a href="http://thecourseforum.com/search/search?utf8=%E2%9C%93&query={{ .Department }}+{{ .Number }}&button=">TCF</a>
-			<!-- <a href="https://evals.itc.virginia.edu/course-selectionguide/pages/SGMain.jsp?cmp={{ .Department }},{{ .Number }}," class="btn btn-success btn-xs pull-right">+ Add to My Class List</a> -->
+			<a href="http://thecourseforum.com/search/search?utf8=%E2%9C%93&query={{ .class.Department }}+{{ .class.Number }}&button=">TCF</a>
+			{{ if $loggedIn }}
+			<a href="/class/{{ .class.Department }}/{{ .class.Number }}/add" class="btn btn-success btn-xs pull-right">+ Add to My Class List</a>
+			{{ end }}
 		</div>
 	</div>
