@@ -3,8 +3,10 @@
 
 <div class="container" id="main">
 <br/>
+{{ $loggedIn := .loggedIn }}
 {{ range .classes }}
-	{{ template "class.html" . }}
+	{{ $op := classCreator . $loggedIn }}
+	{{ template "class.html" $op }}
 {{ else }}
 <h1>Sorry, couldn't find any classes for that department.</h1>
 {{ end }}

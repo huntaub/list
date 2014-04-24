@@ -6,17 +6,31 @@ module:testrunner
 
 GET     /                                       App.Index
 
+# Class Actions
 GET     /class/none                             App.NotFound
 GET     /class/:dept/:num                       App.Class
+GET     /class/:dept/:num/add                   App.ClassAdd
+GET     /class/:dept/:num/remove                   App.ClassRemove
 
+# Departmental Actions
 GET     /department/:dept                       App.Department
 
+# Schedulizer
 GET     /schedule/:perm/:num                    App.Schedule
 
+# Searching and Building
 POST    /search                                 App.Search
 
 POST    /build                                  App.Build
 GET     /build/timeout                          App.Timeout
+
+# User Actions
+POST    /login                                  Users.Login
+GET     /logout                                 Users.Logout
+POST    /register                               Users.Register
+
+# API Requests
+GET     /api/documentation                      API.Documentation
 
 # Ignore favicon requests
 GET     /favicon.ico                            404
