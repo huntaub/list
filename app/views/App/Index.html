@@ -173,19 +173,13 @@
   </div>
 
 {{ if not .loggedIn }}
-  <br/>
-  <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-<!-- Leath's List -->
-<ins class="adsbygoogle"
-     style="display:inline-block;width:728px;height:90px"
-     data-ad-client="ca-pub-2961163517452115"
-     data-ad-slot="7006173095"></ins>
-<script>
-(adsbygoogle = window.adsbygoogle || []).push({});
-</script>
+<br/>
+<div class="text-center alert alert-danger">
+  <p>Are you a CIO and want to advertise events here? Make an account so that we can get in touch!</p>
+</div>
+{{ else }}
+<br/><br/>
 {{ end }}
 </div>
-
-<br/><br/><br/>
 
 {{template "footer.html" .}}

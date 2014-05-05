@@ -31,6 +31,7 @@ POST    /register                               Users.Register
 
 # API Requests
 GET     /api/documentation                      API.Documentation
+GET     /api/settings                           API.Settings
 
 # Ignore favicon requests
 GET     /favicon.ico                            404
