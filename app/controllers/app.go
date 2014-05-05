@@ -125,69 +125,14 @@ type App struct {
 	session string
 }
 
+// Automatically Load Login State from Session
 func (c App) Init() revel.Result {
 	_, loggedIn := c.Session["user"]
 	c.RenderArgs["loggedIn"] = loggedIn
 	return nil
 }
 
-func (c App) ClassAdd(dept string, num int) revel.Result {
-	user, ok := c.Session["user"]
-	if !ok {
-		c.Response.Status = 403
-		return c.Render()
-	}
-
-	var u User
-	err := users.Find(map[string]string{"email": user}).One(&u)
-	if err != nil {
-		panic(err)
-	}
-
-	u.ClassBucket = append(u.ClassBucket, fmt.Sprintf("%v %v", dept, num))
-
-	err = users.Update(map[string]string{"email": user}, u)
-	if err != nil {
-		panic(err)
-	}
-
-	return c.Redirect(routes.App.Index())
-}
-
-func (c App) ClassRemove(dept string, num int) revel.Result {
-	user, ok := c.Session["user"]
-	if !ok {
-		c.Response.Status = 403
-		return c.Render()
-	}
-
-	var u User
-	err := users.Find(map[string]string{"email": user}).One(&u)
-	if err != nil {
-		panic(err)
-	}
-
-	newBucket := make([]string, len(u.ClassBucket)-1)
-	found := false
-	i := 0
-	for _, v := range u.ClassBucket {
-		if v == fmt.Sprintf("%v %v", dept, num) && !found {
-			found = true
-			continue
-		}
-		newBucket[i] = v
-		i++
-	}
-	u.ClassBucket = newBucket
-
-	err = users.Update(map[string]string{"email": user}, u)
-	if err != nil {
-		panic(err)
-	}
-
-	return c.Redirect(routes.App.Index())
-}
-
+// Index of the Site
 func (c App) Index() revel.Result {
 	var result []string
 	err := collection.Find(nil).Distinct("department", &result)
@@ -398,6 +343,61 @@ func (c App) Schedule(perm string, num int) revel.Result {
 	return c.RenderTemplate("App/Build.html")
 }
 
-func (c App) Timeout() revel.Result {
-	return c.Render()
+// Add Class to User Class List
+func (c App) ClassAdd(dept string, num int) revel.Result {
+	user, ok := c.Session["user"]
+	if !ok {
+		c.Response.Status = 403
+		return c.Render()
+	}
+
+	var u User
+	err := users.Find(map[string]string{"email": user}).One(&u)
+	if err != nil {
+		panic(err)
+	}
+
+	u.ClassBucket = append(u.ClassBucket, fmt.Sprintf("%v %v", dept, num))
+
+	err = users.Update(map[string]string{"email": user}, u)
+	if err != nil {
+		panic(err)
+	}
+
+	return c.Redirect(routes.App.Index())
+}
+
+// Remove Class from User Class List
+func (c App) ClassRemove(dept string, num int) revel.Result {
+	user, ok := c.Session["user"]
+	if !ok {
+		c.Response.Status = 403
+		return c.Render()
+	}
+
+	var u User
+	err := users.Find(map[string]string{"email": user}).One(&u)
+	if err != nil {
+		panic(err)
+	}
+
+	newBucket := make([]string, len(u.ClassBucket)-1)
+	found := false
+	i := 0
+	for _, v := range u.ClassBucket {
+		if v == fmt.Sprintf("%v %v", dept, num) && !found {
+			found = true
+			continue
+		}
+		newBucket[i] = v
+		i++
+	}
+	u.ClassBucket = newBucket
+
+	err = users.Update(map[string]string{"email": user}, u)
+	if err != nil {
+		panic(err)
+	}
+
+	return c.Redirect(routes.App.Index())
 }

@@ -22,7 +22,6 @@ GET     /schedule/:perm/:num                    App.Schedule
 POST    /search                                 App.Search
 
 POST    /build                                  App.Build
-GET     /build/timeout                          App.Timeout
 
 # User Actions
 POST    /login                                  Users.Login
