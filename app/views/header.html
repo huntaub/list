@@ -36,11 +36,12 @@
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
           <ul class="nav navbar-nav navbar-right">
             {{ if .loggedIn }}
+            <li><a href="#">Ads</a></li>
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown">API <b class="caret"></b></a>
               <ul class="dropdown-menu">
                 <li><a href="/api/documentation">Documentation</a></li>
-                <li><a href="#">Account Settings</a></li>
+                <li><a href="/api/settings">Account Settings</a></li>
               </ul>
             </li>
             <li><a href="/logout">Logout</a></li>

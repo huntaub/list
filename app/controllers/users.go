@@ -6,7 +6,9 @@ import (
 	"github.com/huntaub/list/app/routes"
 	"github.com/robfig/revel"
 	"labix.org/v2/mgo"
+	"math/rand"
 	"strings"
+	"time"
 )
 
 type User struct {
@@ -14,13 +16,30 @@ type User struct {
 	HashedPassword string
 	FullName       string
 	ClassBucket    []string
+	APIKey         string
 }
 
 var users *mgo.Collection
 
+const api_chars = "abcdefghijklmnopqrstuvwxyz0123456789"
+
+func generateKey() string {
+	r := make([]string, 15)
+	for i := 0; i < 15; i++ {
+		l := rand.Intn(len(api_chars))
+		if i != 0 && r[i-1] == string(api_chars[l]) {
+			i--
+			continue
+		}
+		r[i] = string(api_chars[l])
+	}
+	return strings.Join(r, "")
+}
+
 func init() {
 	session, _ := mgo.Dial("mongodb://leath:hunter0813@oceanic.mongohq.com:10000/list")
 	users = session.DB("list").C("users")
+	rand.Seed(time.Now().UnixNano())
 }
 
 type Users struct {
@@ -74,11 +93,18 @@ func (u *Users) Register(name string, email string, password string, cpassword s
 		return u.Redirect(routes.App.Index())
 	}
 
+tryAgain:
+	testKey := generateKey()
+	if users.Find(map[string]string{"apikey": testKey}).One(&existing) == nil {
+		goto tryAgain
+	}
+
 	pass, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	users.Insert(&User{
 		Email:          email,
 		FullName:       name,
 		HashedPassword: hex.EncodeToString(pass),
+		APIKey:         testKey,
 	})
 
 	u.Session["user"] = email
