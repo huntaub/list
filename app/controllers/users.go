@@ -5,10 +5,8 @@ import (
 	"encoding/hex"
 	"github.com/huntaub/list/app/routes"
 	"github.com/robfig/revel"
-	"labix.org/v2/mgo"
 	"math/rand"
 	"strings"
-	"time"
 )
 
 type User struct {
@@ -18,8 +16,6 @@ type User struct {
 	ClassBucket    []string
 	APIKey         string
 }
-
-var users *mgo.Collection
 
 const api_chars = "abcdefghijklmnopqrstuvwxyz0123456789"
 
@@ -34,12 +30,6 @@ func generateKey() string {
 		r[i] = string(api_chars[l])
 	}
 	return strings.Join(r, "")
-}
-
-func init() {
-	session, _ := mgo.Dial("mongodb://leath:hunter0813@oceanic.mongohq.com:10000/list")
-	users = session.DB("list").C("users")
-	rand.Seed(time.Now().UnixNano())
 }
 
 type Users struct {
