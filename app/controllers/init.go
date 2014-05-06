@@ -3,6 +3,7 @@ package controllers
 import (
 	"github.com/huntaub/list/app/schedule"
 	"github.com/robfig/revel"
+	"github.com/robfig/revel/modules/jobs/app/jobs"
 	"labix.org/v2/mgo"
 	"math/rand"
 	"net/http"
@@ -34,7 +35,8 @@ func StartApp() {
 
 	// Start Parsing Lou's List
 	revel.INFO.Printf("Launching Parser...")
-	StartParser()
+	jobs.Now(Parser{})
+	jobs.Every(1*time.Hour, Parser{})
 
 	// Regex to Recognize Classes
 	revel.INFO.Printf("Compiling Regular Expressions...")
@@ -51,33 +53,26 @@ func StartApp() {
 	revel.INFO.Printf("Initialization Complete")
 }
 
-// Start Parser
-func StartParser() {
-	f := func(now time.Time) {
-		revel.INFO.Printf("Updating Lou's List at %v", now)
-		resp, err := http.Get("http://rabi.phys.virginia.edu/mySIS/CS2/page.php?Semester=1148&Type=Group&Group=CS&Print=")
-		if err != nil {
-			panic(err)
-		}
-		defer func() {
-			if err := resp.Body.Close(); err != nil {
-				panic(err)
-			}
-		}()
+type Parser struct{}
 
-		classList, err = schedule.ParseList(resp.Body)
-		if err != nil {
-			panic(err)
-		}
-		SaveClassesToDB(classList, collection)
-		lastUpdate = now
+// Start Parser
+func (l Parser) Run() {
+	now := time.Now()
+	revel.INFO.Printf("Updating Lou's List at %v", now)
+	resp, err := http.Get("http://rabi.phys.virginia.edu/mySIS/CS2/page.php?Semester=1148&Type=Group&Group=CS&Print=")
+	if err != nil {
+		panic(err)
 	}
-	go func() {
-		c := time.Tick(time.Hour * 1)
-		for {
-			now := <-c
-			f(now)
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			panic(err)
 		}
 	}()
-	f(time.Now())
+
+	classList, err = schedule.ParseList(resp.Body)
+	if err != nil {
+		panic(err)
+	}
+	SaveClassesToDB(classList, collection)
+	lastUpdate = now
 }
