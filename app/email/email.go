@@ -9,6 +9,7 @@ import (
 	"time"
 )
 
+// Send Email Verification
 func SendVerificationEmail(user *models.User, baseURL string) error {
 	// Open New Mandrill API
 	api, err := gochimp.NewMandrill(MandrillAPIKey)
@@ -28,6 +29,7 @@ func SendVerificationEmail(user *models.User, baseURL string) error {
 		TrackOpens:       true,
 		TrackClicks:      true,
 		InlineCss:        true,
+		AutoText:         true,
 		TrackingDomain:   "track.list.hunterleath.com",
 		SigningDomain:    "list.hunterleath.com",
 		ReturnPathDomain: "track.list.hunterleath.com",
