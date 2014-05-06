@@ -54,6 +54,19 @@
   </div>
 </div>
 
+<div class="container">
+  {{ if .flash.success }}
+  <div class="alert alert-success">
+    {{ .flash.success }}
+  </div>
+  {{ end }}
+  {{ if .flash.error }}
+  <div class="alert alert-warning">
+    {{ .flash.error }}
+  </div>
+  {{ end }}
+</div>
+
 {{ if .loggedIn }}
 <div class="container">
   <div class="row">
@@ -107,11 +120,6 @@
 
 <div style="background-color: #dddddd; padding: 20px 0; margin: 10px 0;">
   <div class="container">
-    {{ if .flash.error }}
-    <div class="alert alert-warning">
-      {{ .flash.error }}
-    </div>
-    {{ end }}
     <div class="row">
       <div class="col-md-4">
       <h3 style="margin-top: 0;">Register</h3>
