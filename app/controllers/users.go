@@ -6,7 +6,7 @@ import (
 	mailer "github.com/huntaub/list/app/email"
 	"github.com/huntaub/list/app/models"
 	"github.com/huntaub/list/app/routes"
-	"github.com/robfig/revel"
+	"github.com/revel/revel"
 	"math/rand"
 	"strings"
 )

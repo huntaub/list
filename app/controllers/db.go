@@ -3,7 +3,7 @@ package controllers
 import (
 	"fmt"
 	"github.com/huntaub/list/app/schedule"
-	"github.com/robfig/revel"
+	"github.com/revel/revel"
 	"labix.org/v2/mgo"
 )
 

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"github.com/huntaub/list/app/models"
 	"github.com/huntaub/list/app/schedule"
-	"github.com/robfig/revel"
+	"github.com/revel/revel"
 )
 
 type API struct {
