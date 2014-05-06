@@ -10,12 +10,21 @@ import (
 )
 
 func SendVerificationEmail(user *models.User, baseURL string) error {
+	// Open New Mandrill API
 	api, err := gochimp.NewMandrill(MandrillAPIKey)
 	if err != nil {
 		return err
 	}
 
+	// Create the message
 	message := gochimp.Message{
+		To: []gochimp.Recipient{
+			// Only One Recipient!
+			gochimp.Recipient{
+				Email: user.Email,
+				Name:  user.FullName,
+			},
+		},
 		TrackOpens:       true,
 		TrackClicks:      true,
 		InlineCss:        true,
@@ -39,6 +48,7 @@ func SendVerificationEmail(user *models.User, baseURL string) error {
 		},
 	}
 
+	// Send the message
 	response, err := api.MessageSendTemplate("leath-s-list-email-verification", nil, message, false)
 	for _, v := range response {
 		if v.RejectedReason != "" {
