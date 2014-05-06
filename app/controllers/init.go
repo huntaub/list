@@ -20,6 +20,10 @@ var lists *mgo.Collection
 var users *mgo.Collection
 
 func init() {
+	revel.OnAppStart(Start)
+}
+
+func Start() {
 	revel.INFO.Printf("Beginning Initialization Process...")
 
 	// Load Database Connections
@@ -81,7 +85,6 @@ func StartParser() {
 		}
 	}()
 	f(time.Now())
-	// End Parser Code
 }
 
 // Prepopulate Revel with Important Template Functions
