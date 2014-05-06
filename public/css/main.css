@@ -61,21 +61,20 @@ form#classSearch {
   border-left: solid 3px #23a020 !important;
 }
 
-.nav-list li {
-  padding: 3px;
-}
-
 .nav-list li a {
   padding-left: 10px;
+  padding-top: 3px;
+  padding-bottom: 3px;
   border-left: 2px solid white;
   color: #999;
 }
 
-.nav-list li a.visit {
-  color: #0c0919;
+.nav-list li.active a {
+  color: #0c0919 !important;
+    border-left: 2px solid #fd7a08;
 }
 
 .nav-list li a:hover {
-  border-left: 2px solid #fd7a08;
+  border-left: 2px solid #ffd3b6;
   text-decoration: none;
 }

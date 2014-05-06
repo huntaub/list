@@ -17,7 +17,7 @@
       <script src="/public/{{.}}" type="text/javascript" charset="utf-8"></script>
     {{end}}
   </head>
-  <body>
+  <body {{ if .spy }}data-spy="scroll" data-target=".scrolled-nav"{{ end }}>
 
     <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
     <!-- Brand and toggle get grouped for better mobile display -->

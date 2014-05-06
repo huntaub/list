@@ -1,4 +1,5 @@
 {{set . "title" "API Documentation" }}
+{{ set . "spy" true }}
 {{ append . "moreScripts" "js/prism.js" }}
 {{ append . "moreStyles" "css/prism.css" }}
 {{template "header.html" .}}
@@ -6,19 +7,21 @@
 <div class="container" id="main">
 	<div class="row">
 		<div class="col-md-4" style="position: fixed; top: 70px;">
-			<ul class="list-unstyled nav-list">
-				<li><a href="#overview" class="visit">Overview</a></li>
-				<li><a href="#class">Class Information</a></li>
-				<li><a href="#">Department Information</a></li>
-				<li><a href="#">Schedule Building</a></li>
-			</ul>
+			<div class="scrolled-nav">
+				<ul class="list-unstyled nav-list nav">
+					<li class="active"><a href="#overview">Overview</a></li>
+					<li><a href="#class">Class Information</a></li>
+					<li><a href="#department">Department Information</a></li>
+					<li><a href="#schedule">Schedule Building</a></li>
+				</ul>
+			</div>
 		</div>
 		<div class="col-md-8 col-md-offset-4">
 			<h1 id="overview">Leath's List API Documentation</h1>
 			<p>The Leath's List API was created in order to free class data fully from SIS. It allows students and faculty to create applications that rely on the Data scraped from Lou's List and more without having to go through that work themselves.</p>
 			<p>In order to use the documentation, you must be registered through Leath's List and have a working "API Key" which you can find by clicking "API" and "Account Settings" on the navbar above.</p>
 			<h3 id="class">Class Information</h3>
-			<p><code>GET /api/YOUR_API_KEY/class</code></p>
+			<p><code>POST /api/YOUR_API_KEY/class</code></p>
 			<p>The Class API will return information about a class (enrollment, name, sections) by sending information about the class.</p>
 			<h4>Input</h4>
 <pre style="padding-top: 0; padding-bottom: 0;">
@@ -60,11 +63,25 @@
 }
 </code>
 </pre>
-			<h3 id="class">Department Information</h3>
-			<p><code>GET /api/YOUR_API_KEY/department</code></p>
+			<h3 id="department">Department Information</h3>
+			<p><code>POST /api/YOUR_API_KEY/department</code></p>
 			<p>The Class API will return a list of classes by department mnemonic.</p>
-			<h3 id="class">Schedule Building</h3>
-			<p><code>GET /api/YOUR_API_KEY/schedule</code></p>
+			<h4>Input</h4>
+<pre style="padding-top: 0; padding-bottom: 0;">
+<code class="language-javascript">
+{
+	"department": "CS",
+}
+</code>
+</pre>
+<h4>Output</h4>
+<pre style="padding-top: 0; padding-bottom: 0;">
+<code class="language-javascript">
+[{department: "CS", number: "2150", ... (see above for full class specification)}, ...]
+</code>
+</pre>
+			<h3 id="schedule">Schedule Building</h3>
+			<p><code>POST /api/YOUR_API_KEY/schedule</code></p>
 			<p>The Schedule API will return a list of schedules from a list of classes.</p>
 		</div>
 	</div>

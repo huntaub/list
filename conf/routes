@@ -34,9 +34,9 @@ GET     /api/documentation                      API.Documentation
 GET     /api/settings                           API.Settings
 
 # API v1.0
-GET     /api/:key/class                         API.Class
-GET     /api/:key/department                    API.Department
-GET     /api/:key/schedule                      API.Schedule
+POST    /api/:key/class                         API.Class
+POST    /api/:key/department                    API.Department
+POST    /api/:key/schedule                      API.Schedule
 
 # Ignore favicon requests
 GET     /favicon.ico                            404

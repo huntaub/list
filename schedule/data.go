@@ -25,7 +25,7 @@ type Class struct {
 	Department string
 	Number     int
 	Sections   SectionList
-	SectionMap map[int]*Section `bson:"-,omitempty"`
+	SectionMap map[int]*Section `bson:"-,omitempty" json:"-,omitempty"`
 }
 
 type Section struct {
