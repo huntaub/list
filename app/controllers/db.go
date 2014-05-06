@@ -24,9 +24,9 @@ func SaveClassesToDB(c schedule.ClassList, collection *mgo.Collection) {
 		}
 
 		// Put them in a Hash Map
-		recordsMap := make(map[string]bool)
+		recordsMap := make(map[string]DBRecord)
 		for _, v := range records {
-			recordsMap[fmt.Sprintf("%v %v", v.Department, v.Number)] = true
+			recordsMap[fmt.Sprintf("%v %v", v.Department, v.Number)] = v
 		}
 
 		// Iterate over new records
