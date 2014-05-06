@@ -46,7 +46,9 @@
             </li>
             <li><a href="/logout">Logout</a></li>
             {{ end }}
-            <li><a href="#">Last Update: {{ lastUpdated }}</a></li>
+            {{ if .lastUpdated }}
+            <li><a href="#">Last Update: {{ .lastUpdated }}</a></li>
+            {{ end }}
           </ul>
         </div><!-- /.navbar-collapse -->
       </div>
