@@ -19,11 +19,7 @@ var collection *mgo.Collection
 var lists *mgo.Collection
 var users *mgo.Collection
 
-func init() {
-	revel.OnAppStart(Start)
-}
-
-func Start() {
+func StartApp() {
 	revel.INFO.Printf("Beginning Initialization Process...")
 
 	// Load Database Connections

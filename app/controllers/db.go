@@ -14,6 +14,7 @@ type DBRecord struct {
 
 func SaveClassesToDB(c schedule.ClassList, collection *mgo.Collection) {
 	if revel.Config.BoolDefault("server.dbwrite", false) {
+		revel.INFO.Printf("Writing Data to Database")
 
 		// Get all Current Records
 		var records []DBRecord
