@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/base64"
 	"fmt"
+	"github.com/huntaub/list/app/models"
 	"github.com/huntaub/list/app/routes"
 	"github.com/huntaub/list/schedule"
 	"github.com/robfig/revel"
@@ -35,7 +36,7 @@ func (c App) Index() revel.Result {
 	user, ok := c.Session["user"]
 	var classes []*schedule.Class
 	if ok {
-		var u User
+		var u models.User
 		err := users.Find(map[string]string{"email": user}).One(&u)
 		if err != nil {
 			panic(err)
@@ -243,7 +244,7 @@ func (c App) ClassAdd(dept string, num int) revel.Result {
 		return c.Render()
 	}
 
-	var u User
+	var u models.User
 	err := users.Find(map[string]string{"email": user}).One(&u)
 	if err != nil {
 		panic(err)
@@ -267,7 +268,7 @@ func (c App) ClassRemove(dept string, num int) revel.Result {
 		return c.Render()
 	}
 
-	var u User
+	var u models.User
 	err := users.Find(map[string]string{"email": user}).One(&u)
 	if err != nil {
 		panic(err)

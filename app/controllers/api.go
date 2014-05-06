@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"github.com/huntaub/list/app/models"
 	"github.com/robfig/revel"
 )
 
@@ -13,7 +14,7 @@ func (c API) Documentation() revel.Result {
 }
 
 func (c API) Settings() revel.Result {
-	var u User
+	var u models.User
 	err := users.Find(map[string]string{"email": c.Session["user"]}).One(&u)
 	if err != nil {
 		panic(err)

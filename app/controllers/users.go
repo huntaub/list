@@ -3,25 +3,22 @@ package controllers
 import (
 	"code.google.com/p/go.crypto/bcrypt"
 	"encoding/hex"
+	mailer "github.com/huntaub/list/app/email"
+	"github.com/huntaub/list/app/models"
 	"github.com/huntaub/list/app/routes"
 	"github.com/robfig/revel"
 	"math/rand"
 	"strings"
 )
 
-type User struct {
-	Email          string
-	HashedPassword string
-	FullName       string
-	ClassBucket    []string
-	APIKey         string
-}
-
 const api_chars = "abcdefghijklmnopqrstuvwxyz0123456789"
 
-func generateKey() string {
-	r := make([]string, 15)
-	for i := 0; i < 15; i++ {
+const api_key_length = 15
+const email_verification_length = 30
+
+func generateKey(length int) string {
+	r := make([]string, length)
+	for i := 0; i < length; i++ {
 		l := rand.Intn(len(api_chars))
 		if i != 0 && r[i-1] == string(api_chars[l]) {
 			i--
@@ -36,8 +33,27 @@ type Users struct {
 	*revel.Controller
 }
 
+func (u *Users) VerifyEmail(verification string, email string) revel.Result {
+	var user *models.User
+	err := users.Find(map[string]string{"email": email, "verificationkey": verification}).One(&user)
+	if err != nil {
+		u.Flash.Error("Incorrect verification key.")
+		return u.Redirect(routes.App.Index())
+	}
+
+	user.Verified = true
+	err = users.Update(map[string]string{"email": email}, user)
+	if err != nil {
+		u.Flash.Error("Unable to verify you at this time.")
+		return u.Redirect(routes.App.Index())
+	}
+
+	u.Flash.Success("Email Successfully verified.")
+	return u.Redirect(routes.App.Index())
+}
+
 func (u *Users) Login(email string, password string) revel.Result {
-	var user *User
+	var user *models.User
 	err := users.Find(map[string]string{"email": email}).One(&user)
 	if err != nil {
 		u.Flash.Error("Incorrect username or password.")
@@ -50,7 +66,11 @@ func (u *Users) Login(email string, password string) revel.Result {
 		return u.Redirect(routes.App.Index())
 	}
 
-	u.Session["user"] = email
+	if user.Verified {
+		u.Session["user"] = email
+	} else {
+		u.Flash.Error("You cannot login until you verify your email.")
+	}
 
 	return u.Redirect(routes.App.Index())
 }
@@ -77,28 +97,39 @@ func (u *Users) Register(name string, email string, password string, cpassword s
 		return u.Redirect(routes.App.Index())
 	}
 
-	var existing *User
+	var existing *models.User
 	if users.Find(map[string]string{"email": email}).One(&existing) == nil {
 		u.Flash.Error("Someone with that email has already registered.")
 		return u.Redirect(routes.App.Index())
 	}
 
 tryAgain:
-	testKey := generateKey()
+	testKey := generateKey(api_key_length)
 	if users.Find(map[string]string{"apikey": testKey}).One(&existing) == nil {
 		goto tryAgain
 	}
 
 	pass, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	users.Insert(&User{
-		Email:          email,
-		FullName:       name,
-		HashedPassword: hex.EncodeToString(pass),
-		APIKey:         testKey,
-	})
 
-	u.Session["user"] = email
+	newUser := &models.User{
+		Email:           email,
+		FullName:        name,
+		HashedPassword:  hex.EncodeToString(pass),
+		APIKey:          testKey,
+		Verified:        false,
+		VerificationKey: generateKey(email_verification_length),
+	}
 
+	err := mailer.SendVerificationEmail(newUser, revel.Config.StringDefault("server.baseurl", ""))
+	if err != nil {
+		u.Flash.Error("Unable to send verification email. Try registering again.")
+		revel.ERROR.Printf("%v", err)
+		return u.Redirect(routes.App.Index())
+	}
+
+	users.Insert(newUser)
+
+	u.Flash.Success("You have successfully registered. Now, we must verify your email. Click on the link that was just sent to you.")
 	return u.Redirect(routes.App.Index())
 }
 

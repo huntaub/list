@@ -27,6 +27,7 @@ POST    /build                                  App.Build
 POST    /login                                  Users.Login
 GET     /logout                                 Users.Logout
 POST    /register                               Users.Register
+GET     /verify/:verification/:email            Users.VerifyEmail
 
 # API Information
 GET     /api/documentation                      API.Documentation
