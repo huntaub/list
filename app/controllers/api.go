@@ -3,7 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"github.com/huntaub/list/app/models"
-	"github.com/huntaub/list/schedule"
+	"github.com/huntaub/list/app/schedule"
 	"github.com/robfig/revel"
 )
 

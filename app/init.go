@@ -2,7 +2,7 @@ package app
 
 import (
 	"github.com/huntaub/list/app/controllers"
-	"github.com/huntaub/list/schedule"
+	"github.com/huntaub/list/app/schedule"
 	"github.com/robfig/revel"
 	"strings"
 	"time"

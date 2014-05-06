@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/huntaub/list/app/models"
 	"github.com/huntaub/list/app/routes"
-	"github.com/huntaub/list/schedule"
+	"github.com/huntaub/list/app/schedule"
 	"github.com/robfig/revel"
 	"sort"
 	"strconv"
