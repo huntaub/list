@@ -1,14 +1,15 @@
 package controllers
 
 import (
-	"github.com/huntaub/list/app/schedule"
-	"github.com/revel/revel"
-	"github.com/revel/revel/modules/jobs/app/jobs"
-	"labix.org/v2/mgo"
 	"math/rand"
 	"net/http"
 	"regexp"
 	"time"
+
+	"github.com/huntaub/list/app/schedule"
+	"github.com/revel/revel"
+	"github.com/revel/revel/modules/jobs/app/jobs"
+	"labix.org/v2/mgo"
 )
 
 var classList schedule.ClassList
@@ -59,7 +60,7 @@ type Parser struct{}
 func (l Parser) Run() {
 	now := time.Now()
 	revel.INFO.Printf("Updating Lou's List at %v", now)
-	resp, err := http.Get("http://rabi.phys.virginia.edu/mySIS/CS2/page.php?Semester=1148&Type=Group&Group=CS&Print=")
+	resp, err := http.Get("http://rabi.phys.virginia.edu/mySIS/CS2/page.php?Semester=1158&Type=Group&Group=CS&Print=")
 	if err != nil {
 		panic(err)
 	}
